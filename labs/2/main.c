@@ -21,6 +21,18 @@ int main(int argc, char* argv[]) {
 
 			read_file("films.txt");
 			break;
+		case 3:
+			printf("You selected task 4 (arrays):\n\n");
+
+			unsigned int arr_size;
+			arr_size = argc - 3;
+			int numbers[arr_size];
+
+			for (int i = 3; i < argc; i++) {
+				numbers[i - 3] = atoi(argv[i]);
+			}
+			find_indices(atoi(argv[2]), arr_size, numbers);
+			break;
 	}
 	return 0;
 }
