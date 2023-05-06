@@ -1,7 +1,7 @@
 #include <math.h>
 
 struct Trie {
-	struct Trie *(children[10]);
+	struct Trie **children;
 	product_t *product;
 	int test;
 };
@@ -15,38 +15,43 @@ void insert_into_trie(unsigned int code) {
 	char code_as_str[(int) log10(code) + 1];
 	sprintf(code_as_str, "%i", code);
 
-	trie_node root_trie;
+	printf("%s\n", code_as_str);
+
+	trie_node **child_ptrs = malloc(sizeof(trie_node *) * 10); 
+
+	trie_node root_trie = { .children = child_ptrs };
+	trie_node *child_node;
 
 
-	// for (unsigned char i = 0; i < strlen(code_as_str); i++) {
-	// 	printf("%c\n", code_as_str[i]);
+	for (unsigned short int i = 0; i < strlen(code_as_str); i++) {
+		printf("i = %u\n", i);
+
+		char c = code_as_str[i];
+
+		printf("c = %c\n", c);
 
 
-	// 	trie.tries[i].test = 1;
+		unsigned short int digit = atoi(&c);
 
-	// }
-
-	// for ()
-	// trie.test = 1;
-	// printf("trie test: %i\n", trie.test);
+		printf("Looking for child: %u\n", digit);
 
 
-	// trie_node trie_child = trie.tries[0];
+		if (root_trie.children[digit]) {
+			printf("Child exists: %u\n", digit);
+			child_node = root_trie.children[digit];
+		} else {
+			printf("Child [%u] doesn't exist\n", digit);
+			trie_node child = { .test = 9 };
+			root_trie.children[digit] = &child;
+		}
+		printf("child node test = %u\n", root_trie.children[digit] -> test);
+	}
 
-	// trie_node child;
-	// printf("trie test: %i\n", trie.test);
-	
-	// trie_node *ptr = (trie_node *) malloc(sizeof(trie_node));
-
-	trie_node child;
-
-	child.test = 10;
-
-	root_trie.children[0] = &child;
-
-	printf("%i\n", root_trie.children[0] -> test);
-
-	// for (int i = 0; i < 10; i++) {
-		// printf("%i\n", root_trie.children[i] -> test);
-	// }
+	for (int i = 0; i < 10; i++) {
+		if (root_trie.children[i]) {
+			printf("%i\n", root_trie.children[i] -> test);
+		} else {
+			printf("Child [%i] doesn't exist\n", i);
+		}
+	}
 }

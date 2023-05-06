@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
 
 	// return EXIT_SUCCESS;
 
-	insert_into_trie(199);
+	insert_into_trie(134);
 
 
 
