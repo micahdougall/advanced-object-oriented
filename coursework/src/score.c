@@ -18,7 +18,6 @@ product_t most_valued_product(product_t *products, int product_count) {
 
 		// Replace MVP if score is improved
 		mvp = (product_score.score > mvp.score) ? product_score : mvp;
-
 	}
 	return mvp.product;
 }
