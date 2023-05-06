@@ -1,17 +1,20 @@
 #include "main.h"
 
-int main(int argc, char const *argv[])
+int main(int argc, char *argv[])
 {
-	char *file_name = "T5-Products-10.txt";
+	if (argc == 1) {
+		printf("Missing required argument for input file.\n");
+		exit(EXIT_FAILURE);
+	}
+
+	char *file_name = argv[1];
 	unsigned int *product_count = (unsigned int *) malloc(sizeof(unsigned int *));
 
 	product_t *products = parse_products_from_file(file_name, product_count);
 
 	print_stock_report(products, *product_count);
 
-	printf("\nMost valued product is...");
 	product_t mvp = most_valued_product(products, *product_count);
-	printf("%s\n", mvp.name);
 
-	return 0;
+	return EXIT_SUCCESS;
 }

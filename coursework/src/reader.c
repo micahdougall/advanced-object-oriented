@@ -11,9 +11,9 @@ product_t * parse_products_from_file(char *file_name, unsigned int *product_coun
 		FILE *file = fopen(file_path, "r");
 
 		unsigned int record_count;
-		fscanf(file, "%d\n", &record_count);
+		fscanf(file, "%u\n", &record_count);
 		*product_count = record_count;
-		printf("%s contains %d records.\n\n", file_name, record_count);
+		printf("%s contains %u records.\n\n", file_name, record_count);
 
 		product_t *products = (product_t*) malloc(sizeof(product_t) * record_count);
 		printf("Memory allocated at %p...", products);
@@ -29,7 +29,7 @@ product_t * parse_products_from_file(char *file_name, unsigned int *product_coun
 
 				fscanf(
 					file, 
-					"%d %d %f %f %s\n", 
+					"%u %u %f %f %s\n", 
 					&code, &stock, &price, &discount, name
 				);
 
@@ -43,13 +43,13 @@ product_t * parse_products_from_file(char *file_name, unsigned int *product_coun
 
 				products[i] = product;
 			} else {
-				printf("Unexpected record count! EOF reached after %d records\n", i);
+				printf("Unexpected record count! EOF reached after %u records\n", i);
 				exit(-1);
 			}
 		}
 		if (!feof(file)) {
 			printf(
-				"Additional data found after record %d, please check file header\n", 
+				"Additional data found after record %u, please check file header\n", 
 				record_count
 			);
 			exit(-1);

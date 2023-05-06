@@ -1,4 +1,0 @@
-3
-126381609 123 0.04 0.02 Bisto_Gravy_Granules1
-126381609 23 0.03 0.02 Bisto_Gravy_Granules2
-1264107207 1 0.02 0.02 Baxters_Minestrone_Soup

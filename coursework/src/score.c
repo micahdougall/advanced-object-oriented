@@ -12,12 +12,20 @@ product_t most_valued_product(product_t *products, int product_count) {
 		product_t product = products[i];
 		product_ext product_score = {
 			.product = product,
-			.score = sqrt(product.price) * product.discount / product.stock
+			.score = (product.stock) // Exclude zero-stock items.
+				? sqrt(product.price) * product.discount / product.stock
+				: 0
 		};
+		// TODO: Add debug flag for verbose printing.
 		// printf("%s has score of %f\n", product.name, product_score.score);
 
 		// Replace MVP if score is improved
 		mvp = (product_score.score > mvp.score) ? product_score : mvp;
 	}
+	printf(
+		"\nMost valued product is %s with a score of %f\n", 
+		mvp.product.name, 
+		mvp.score
+	);
 	return mvp.product;
 }
