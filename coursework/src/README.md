@@ -2,9 +2,6 @@
 
 ![GitHub followers](https://img.shields.io/github/followers/micahdougall?style=social)
 
-## Description
-
-Provide a short description explaining the what, why, and how of your project. Use the following questions as a guide:
 
 ## Table of Contents (Optional)
 
@@ -12,14 +9,15 @@ If your README is long, add a table of contents to make it easy for users to fin
 
 - [System](#system)
 - [Usage](#usage)
+- [References](#usage)
 
 
 ## System
 
 This code has been developed using Sublime text editor and tested in CLion.
-
-gcc version:
-
+- Macbook Pro M1
+- Sublime Text
+- GCC:
     ```
     Apple clang version 14.0.3 (clang-1403.0.22.14.1)
     Target: arm64-apple-darwin22.3.0
@@ -43,4 +41,8 @@ To add a screenshot, create an `assets/images` folder in your repository and upl
 
 
 
+## References for tutorials/conventions used
+
+- https://www.gnu.org/software/gnu-c-manual/gnu-c-manual.html
+- https://www.gnu.org/prep/standards/html_node/Writing-C.html
 
