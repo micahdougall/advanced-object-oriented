@@ -23,7 +23,7 @@ product_t most_valued_product(product_t *products, int product_count) {
 		mvp = (product_score.score > mvp.score) ? product_score : mvp;
 	}
 	printf(
-		"\nMost valued product is %s with a score of %f\n", 
+		"\nMost valued product is %s with a score of %f\n\n", 
 		mvp.product.name, 
 		mvp.score
 	);
