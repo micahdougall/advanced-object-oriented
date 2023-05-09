@@ -1,5 +1,6 @@
 #include "main.h"
 
+
 int main(int argc, char *argv[])
 {
 	if (argc == 1) {
@@ -20,35 +21,44 @@ int main(int argc, char *argv[])
 	trie_node root_node = { 
 		.children = malloc(sizeof(trie_node *) * 10)
 	};
-	// printf(" -> root_node is %p\n", &root_node);
 
-	// printf("\nInserting into trie: %s\n", mvp.name);
-	// insert_into_trie(&root_node, &mvp);
-	
-	// printf("\nInserting into trie: %s\n", products[1].name);
-	// insert_into_trie(&root_node, &products[1]);
-	// insert_into_trie(&root_node, &products[3]);
-	// insert_into_trie(&root_node, &products[8]);
-
-	printf("\nInserting %u products in database...\n\n", *product_count);
+	print_if(VERBOSE, "\nInserting %u products in database...\n\n", *product_count);
 	for (unsigned int i = 0; i < *product_count; i++) {
 		insert_into_trie(&root_node, &products[i]);
 	}
 
-	// char *route = (char *) malloc(sizeof(char));
-	printf("\nPrinting trie...\n");
-	print_trie(&root_node);
+	print_if(VERBOSE, "%s", "\nPrinting trie...\n");
+	// print_trie(&root_node);
 
+	printf("\nSearching for MVP produdct (%s) in database...\n", mvp.name);
 
-	unsigned int search_code = 126381609;
-	product_t *required_product = lookup_product(&root_node, search_code);
+	char search_continue;
+	unsigned int search_code = mvp.code;
 
-	if (required_product != NULL) {
-		printf("\n\nProduct found with code %u\n", search_code);
-		print_product(*required_product);
-	} else {
-		printf("No product found with code %u!\n", search_code);
-	}
+	do {
+		product_t *required_product = lookup_product(&root_node, search_code);
+
+		if (required_product != NULL) {
+			printf(
+				ANSI_BACKGROUND "\nProduct found with code %u\n"
+				ANSI_COLOR_RESET, 
+				search_code
+			);
+			print_product(*required_product);
+		} else {
+			printf("No product found with code %u!\n", search_code);
+		}
+
+		// TODO: Convert to fgets and sscanf for robustness
+		printf("\nSearch for another product? (y/n): ");
+		scanf(" %c", &search_continue);
+		SEARCH_MODE = (search_continue == 'y') ? true : false;
+		//TODO: Break from loop instead
+
+		printf("\nPlease enter product code to search: ");
+		scanf("%u", &search_code);
+	} while (SEARCH_MODE);
+
 
 
 	return EXIT_SUCCESS;

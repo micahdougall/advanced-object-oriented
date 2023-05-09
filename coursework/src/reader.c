@@ -1,8 +1,22 @@
+#include "product.c"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "product.c"
 
+/**
+ * parse_products_from_file() - Parses a file to extract products data.
+ * @file_name: The file name or filep path of the file to parse.
+ * @*product_count: A pointer to store he number of products contained in the file data.
+ * 
+ * Assumes that the file is in the local directory unless a relative path is passed.
+ * The first line of the file should contain the number of records, following which the 
+ * file should contain a single product per line.
+ * 
+ * Will return unsuccessful if the number of records does not match the header.
+ * 
+ * Return: A pointer to an array of products where the data has been stored.
+ */
 product_t * parse_products_from_file(char *file_name, unsigned int *product_count) {
 	char *file_path = realpath(file_name, NULL);
 
@@ -16,9 +30,9 @@ product_t * parse_products_from_file(char *file_name, unsigned int *product_coun
 		printf("%s contains %u records.\n\n", file_name, record_count);
 
 		product_t *products = (product_t*) malloc(sizeof(product_t) * record_count);
-		printf("Memory allocated at %p...", products);
+		print_if(VERBOSE, "Memory allocated at %p...", products);
 
-		printf("reading in products...");
+		print_if(VERBOSE, "%s", "reading in products...");
 		for (unsigned int i = 0; i < record_count; i++) {
 			if (!feof(file)) {
 				unsigned int code;
@@ -54,10 +68,9 @@ product_t * parse_products_from_file(char *file_name, unsigned int *product_coun
 			);
 			exit(-1);
 		}
+		print_if(VERBOSE, "%s", "success.\n");
 
 		fclose(file);
-		printf("success.\n");
-
 		return products;
 	} else {
 		printf("Invalid file path: %s\n", file_name);

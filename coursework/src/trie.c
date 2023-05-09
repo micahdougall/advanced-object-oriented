@@ -39,18 +39,19 @@ void print_node(trie_node *node, char *route) {
 	// free(int_str);
 }
 
-void print_trie(trie_node *node) {
 
-	if (node -> product) {
-		printf(" -> %s\n", (node -> product) -> name);
-	}
+// void print_trie(trie_node *node) {
 
-	for (unsigned int i = 0; i < 10; i++) {
-		if (node -> children[i]) {
-			print_trie(node -> children[i]);
-		}
-	}
-}
+// 	if (node -> product) {
+// 		printf(" -> %s\n", (node -> product) -> name);
+// 	}
+
+// 	for (unsigned int i = 0; i < 10; i++) {
+// 		if (node -> children[i]) {
+// 			print_trie(node -> children[i]);
+// 		}
+// 	}
+// }
 
 product_t * lookup_product(trie_node *node, unsigned int product_code) {
 

@@ -23,7 +23,11 @@ product_t most_valued_product(product_t *products, int product_count) {
 		mvp = (product_score.score > mvp.score) ? product_score : mvp;
 	}
 	printf(
-		"\nMost valued product is %s with a score of %f\n\n", 
+		"\nMost valued product is "
+		ANSI_COLOR_MAGENTA "%s "
+		ANSI_COLOR_RESET "with a score of "
+		ANSI_BOLD_WHITE "%f\n\n"
+		ANSI_COLOR_RESET, 
 		mvp.product.name, 
 		mvp.score
 	);

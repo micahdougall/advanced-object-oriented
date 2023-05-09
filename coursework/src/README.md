@@ -46,3 +46,14 @@ To add a screenshot, create an `assets/images` folder in your repository and upl
 - https://www.gnu.org/software/gnu-c-manual/gnu-c-manual.html
 - https://www.gnu.org/prep/standards/html_node/Writing-C.html
 
+
+## TODO
+
+- Tidy up Trie logic
+- Exit gracefully
+- Comments for Trie
+- Trie pretty print
+- Function for interface
+- free() memory
+- Makefile clean and args
+
