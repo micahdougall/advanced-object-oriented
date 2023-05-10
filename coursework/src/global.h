@@ -9,6 +9,11 @@
 #define ANSI_COLOR_CYAN_BACK "\033[105m"
 #define ANSI_COLOR_RESET "\x1b[0m"
 
+#define MAX_LINE 1000
+
+bool VERBOSE;
+bool SEARCH_MODE;
+
 /**
  * print_if() - Prints if a condition is true.
  * @condition: Condition to check, eg a bool.
@@ -18,6 +23,3 @@
  * Can be passed a global boolean flag, eg VERBOSE, to only print in verbose mode.
  */
 #define print_if(condition, format, value) condition ? printf(format, value) : (void)0;
-
-bool VERBOSE;
-bool SEARCH_MODE;

@@ -27,12 +27,17 @@ product_t * parse_products_from_file(char *file_name, unsigned int *product_coun
 		unsigned int record_count;
 		fscanf(file, "%u\n", &record_count);
 		*product_count = record_count;
-		printf("%s contains %u records.\n\n", file_name, record_count);
+
+		// Verbose print out for file record count.
+		char log_message[MAX_LINE];
+		sprintf(log_message, "%s contains %u records.\n\n", file_name, record_count);
+		print_if(VERBOSE, "%s", log_message);
 
 		product_t *products = (product_t*) malloc(sizeof(product_t) * record_count);
-		print_if(VERBOSE, "Memory allocated at %p...", products);
 
+		print_if(VERBOSE, "Memory allocated at %p...", products);
 		print_if(VERBOSE, "%s", "reading in products...");
+
 		for (unsigned int i = 0; i < record_count; i++) {
 			if (!feof(file)) {
 				unsigned int code;

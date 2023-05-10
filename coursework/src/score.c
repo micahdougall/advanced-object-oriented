@@ -1,10 +1,30 @@
 #include <math.h>
 
+/**
+ * Score - Stores a product along with its calculated score.
+ * @product: The product.
+ * @score: Its score.
+ * 
+ * Simplified with typedef product_ext.
+ */
 typedef struct Score {
 	product_t product;
 	float score;
 } product_ext;
 
+
+/**
+ * most_valued_product() - Returns the most desired product from an array.
+ * @*products: The array of products to analyse.
+ * product_count: The number of products in the array.
+ * 
+ * A score is calculated for each product in the array using three factors:
+ *  - stock: less is better
+ *  - price: higher is better
+ *  - discount: higher is better
+ *  
+ * Returns: The product with the best score.
+ */
 product_t most_valued_product(product_t *products, int product_count) {
 	product_ext mvp;
 
@@ -16,10 +36,13 @@ product_t most_valued_product(product_t *products, int product_count) {
 				? sqrt(product.price) * product.discount / product.stock
 				: 0
 		};
-		// TODO: Add debug flag for verbose printing.
-		// printf("%s has score of %f\n", product.name, product_score.score);
 
-		// Replace MVP if score is improved
+		// Verbose print out for each product score.
+		char log_message[MAX_LINE];
+		sprintf(log_message, "%s has score of %f\n", product.name, product_score.score);
+		print_if(VERBOSE, "%s", log_message);
+
+		// For each product, replace MVP if score has improved.
 		mvp = (product_score.score > mvp.score) ? product_score : mvp;
 	}
 	printf(

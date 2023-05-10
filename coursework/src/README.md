@@ -55,5 +55,6 @@ To add a screenshot, create an `assets/images` folder in your repository and upl
 - Trie pretty print
 - Function for interface
 - free() memory
-- Makefile clean and args
+- Makefile clean and args for verbosity
+
 
