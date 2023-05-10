@@ -1,14 +1,27 @@
 #include <math.h>
 
-struct Trie {
+/**
+ * Trie - Stores a product along with its calculated score.
+ * @**children: Array or pointers to .
+ * @score: Its score.
+ * 
+ * Simplified with typedef product_ext.
+ */
+typedef struct Trie {
 	struct Trie **children;
 	product_t *product;
 	int test;
-};
-typedef struct Trie trie_node;
+} trie_node;
 
 
-
+/**
+ * print_node() - Prints a single node within a trie.
+ * @node: A pointer to the node to print.
+ * @route: The address of the node within the trie.
+ * 
+ * The node is not aware of its own parent structure so the route provides a 
+ * way to include the full address of the node as part of the output.
+ */
 void print_node(trie_node *node, char *route) {
 
 	if (node -> product) {
@@ -39,24 +52,43 @@ void print_node(trie_node *node, char *route) {
 	// free(int_str);
 }
 
+/**
+ * print_trie() - Prints a Trie structure in its entirety.
+ * @root_node: A pointer to the root node of the trie.
+ * 
+ * Works iteratively through the trie and prints each node using print_node(),
+ * to which the route of the node is passed.
+ */
+void print_trie(trie_node *root_node) {
 
-// void print_trie(trie_node *node) {
+	if (root_node -> product) {
+		printf(" -> %s\n", (root_node -> product) -> name);
+	}
 
-// 	if (node -> product) {
-// 		printf(" -> %s\n", (node -> product) -> name);
-// 	}
+	for (unsigned int i = 0; i < 10; i++) {
+		if (root_node -> children[i]) {
+			print_trie(root_node -> children[i]);
+		}
+	}
+}
 
-// 	for (unsigned int i = 0; i < 10; i++) {
-// 		if (node -> children[i]) {
-// 			print_trie(node -> children[i]);
-// 		}
-// 	}
-// }
-
-product_t * lookup_product(trie_node *node, unsigned int product_code) {
+/**
+ * lookup_product() - Searches for a specified product in a Trie structure.
+ * @node: The root node of the trie to search.
+ * @product_code: The unique code of the product to search.
+ * 
+ * The algorithm is recursive such that the root node provided as an argument
+ * need not be the root node of the entire trie structure, but a subset of it.
+ * 
+ * The product_code indicates the unique address where the product should be 
+ * stored within the trie.
+ * 
+ * Returns: A pointer to the product required, or NULL if no product with the
+ * supplied code is found within the trie.
+ */
+product_t* lookup_product(trie_node* node, unsigned int product_code) {
 
 	if (node -> product && (node -> product) -> code == product_code) {
-		// printf(" -> %s\n", (node -> product) -> name);
 		return node -> product;
 	} else {
 		for (unsigned int i = 0; i < 10; i++) {
@@ -70,69 +102,44 @@ product_t * lookup_product(trie_node *node, unsigned int product_code) {
 		}
 		return NULL;
 	}
-
-	// for (unsigned int i = 0; i < 10; i++) {
-	// 	if (node -> children[i]) {
-	// 		print_trie(node -> children[i]);
-	// 	}
-	// }
 }
 
+/**
+ * insert_into_trie() - Inserts an array or products into a Trie structure.
+ * @*root_node: A pointer to the root node of the trie.
+ * @*product: An array of products to insert into the trie.
+ * 
+ * The algorithm uses the unique product.code to insert each product into the
+ * trie where each digit in the code denotes the index for a child node from
+ * the predceding parent node.
+ * 
+ * Returns: void
+ */
+void insert_into_trie(trie_node* root_node, product_t* product) {
 
-void insert_into_trie(trie_node *root_node, product_t *product) {
-
-	// Create char string from numeric code
+	// Create string from numeric code (accounting for number size)
 	char code_as_str[(int) log10(product -> code) + 1];
 	sprintf(code_as_str, "%i", product -> code);
 
-	// printf("Code as string: %s\n", code_as_str);
-
-	// printf(" -> root_node is %p\n", root_node);
-
-	trie_node *current_node_ptr = root_node;
-	// printf(" -> current_node_ptr is %p\n", current_node_ptr);
-
-	trie_node *new_node = (trie_node *) malloc(sizeof(trie_node *));
+	trie_node* current_node_ptr = root_node;
 
 	for (unsigned short int c = 0; c < strlen(code_as_str); c++) {
 		char code_char = code_as_str[c];
 		unsigned short int idx = atoi(&code_char);
 
-		// printf("\n\nLooking for child: %u\n", idx);
-
-		if (current_node_ptr -> children[idx]) {
-			continue;
-			// printf("Child exists: %u\n", idx);
-		} else {
-			// printf("Child [%u] doesn't exist\n", idx);
-			// printf(" -> child_node is %p\n", current_node_ptr -> children[idx]);
+		if (!current_node_ptr -> children[idx]) {
 
 			// Create new child node
-			trie_node **children = malloc(sizeof(trie_node *) * 10);
+			trie_node* new_node = (trie_node*) malloc(sizeof(trie_node*));
+			trie_node** children = (trie_node**) malloc(sizeof(trie_node**) * 10);
 
-			trie_node *new_node = malloc(sizeof(trie_node *));
+			// Update pointers
 			new_node -> children = children;
-
 			current_node_ptr -> children[idx] = new_node;
-			// printf(" -> child_node is %p\n", current_node_ptr -> children[idx]);
-
-
-			// printf(" -> new_node is %p\n", new_node);
-			// printf(" -> new_node is %p\n", &new_node);
 
 			*(current_node_ptr -> children[idx]) = *new_node;
-			// printf("Added new child at branch %u\n", idx);
-			// printf(" -> child_node is %p\n", current_node_ptr -> children[idx]);
 		}
-
 		current_node_ptr = current_node_ptr -> children[idx];
-		// printf(" -> current_node_ptr is %p\n", current_node_ptr);
-
 	}
-	// For proof of tree work where product would be
-	current_node_ptr -> test = 10;
 	current_node_ptr -> product = product;
-
-	// printf(" -> root_node is %p\n", root_node);
-	// print_node(root_node, NULL);
 }

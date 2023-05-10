@@ -56,5 +56,10 @@ To add a screenshot, create an `assets/images` folder in your repository and upl
 - Function for interface
 - free() memory
 - Makefile clean and args for verbosity
-
+- Resize buffers for the strings
+- Consider that memory is not universal so check from malloc
+- Check gcc compile options
+- Assign free'd pointers to NULL or handle somehow
+- Do not use arrays in structs, change tp pointrts
+- malloc free in insert_into_trie not working
 

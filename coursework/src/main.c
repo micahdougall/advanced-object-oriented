@@ -28,8 +28,8 @@ int main(int argc, char *argv[])
 	}
 
 	// TODO: Decide whether to print trie or not?
-	// print_if(VERBOSE, "%s", "\nPrinting trie...\n");
-	// print_trie(&root_node);
+	print_if(VERBOSE, "%s", "\nPrinting trie...\n");
+	print_trie(&root_node);
 
 	printf("\nSearching for MVP produdct (%s) in database...\n", mvp.name);
 
