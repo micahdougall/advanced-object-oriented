@@ -2,75 +2,50 @@
 
 /**
  * Trie - Stores a product along with its calculated score.
- * @**children: Array or pointers to .
+ * @children: Array or pointers to .
  * @score: Its score.
  * 
  * Simplified with typedef product_ext.
  */
 typedef struct Trie {
-	struct Trie **children;
-	product_t *product;
+	struct Trie** children;
+	product_t* product;
 	int test;
 } trie_node;
 
 
 /**
- * print_node() - Prints a single node within a trie.
- * @node: A pointer to the node to print.
- * @route: The address of the node within the trie.
- * 
- * The node is not aware of its own parent structure so the route provides a 
- * way to include the full address of the node as part of the output.
- */
-void print_node(trie_node *node, char *route) {
-
-	if (node -> product) {
-		printf("%s -> %s\n", route, (node -> product) -> name);
-	}
-
-
-	for (int i = 0; i < 10; i++) {
-		char *int_str = (char *) malloc(sizeof(char));
-		sprintf(int_str, "%d", i);
-
-		strcpy(route, int_str);
-		// strcat(route, int_str);
-		printf("%s\n", route);
-
-		// if (node -> children[i]) {
-		// 	sprintf(int_str, "%d", i);
-
-		// 	// if (route == NULL) {
-		// 		// route = int_str;
-		// 	// } else {
-		// 	strcat(route, int_str);
-		// 	// }
-
-		// 	print_node(node -> children[i], route);
-		// }
-	}
-	// free(int_str);
-}
-
-/**
- * print_trie() - Prints a Trie structure in its entirety.
- * @root_node: A pointer to the root node of the trie.
+ * print_trie() - Prints a Trie structure.
+ * @node: A pointer to the node in the trie being printed.
+ * @indent: Amount to indent the child (depth level).
+ * @child_idx: The index of the child node being printed
  * 
  * Works iteratively through the trie and prints each node using print_node(),
  * to which the route of the node is passed.
  */
-void print_trie(trie_node *root_node) {
+void print_trie(
+	trie_node* node, unsigned int indent, unsigned int child_idx
+) {
 
-	if (root_node -> product) {
-		printf(" -> %s\n", (root_node -> product) -> name);
+	char* product_name = (node -> product)
+		? (node -> product) -> name
+		: "";
+
+	char* spacing = (char*) malloc(sizeof(char) * indent);
+	// spacing[0] = '-';
+	for (unsigned int i = 0; i < indent; i++) {
+		spacing[i] = '-';
 	}
 
+	printf("%s %u %s\n", spacing, child_idx, product_name);
+
 	for (unsigned int i = 0; i < 10; i++) {
-		if (root_node -> children[i]) {
-			print_trie(root_node -> children[i]);
+		if (node -> children[i]) {
+			print_trie(node -> children[i], indent + 1, i);
 		}
 	}
 }
+
 
 /**
  * lookup_product() - Searches for a specified product in a Trie structure.
@@ -104,6 +79,7 @@ product_t* lookup_product(trie_node* node, unsigned int product_code) {
 	}
 }
 
+
 /**
  * insert_into_trie() - Inserts an array or products into a Trie structure.
  * @*root_node: A pointer to the root node of the trie.
@@ -112,8 +88,6 @@ product_t* lookup_product(trie_node* node, unsigned int product_code) {
  * The algorithm uses the unique product.code to insert each product into the
  * trie where each digit in the code denotes the index for a child node from
  * the predceding parent node.
- * 
- * Returns: void
  */
 void insert_into_trie(trie_node* root_node, product_t* product) {
 

@@ -1,6 +1,5 @@
 #include "main.h"
 
-
 int main(int argc, char const *argv[])
 {
 	allocate_fruit();
@@ -13,25 +12,26 @@ int main(int argc, char const *argv[])
 
 void allocate_fruit() {
 	
+	// Stack struct
 	fruit_t stack_fruit = {
 		.name = "Apple",
 		.price = 0.65,
 		.taste = 1
 	};
-
-	fruit_t *heap_fruit = (fruit_t *) malloc(sizeof(fruit_t *));
-	// Task 3.2 refactor to use heap memory for string
-	heap_fruit -> name = (char *) malloc(sizeof(char *));
-	// Is this safe / legal? Seems to work.
-	heap_fruit -> name = "Lemon";
-	heap_fruit -> price = 0.43;
-	heap_fruit -> taste = 0;
-
-
 	printf(
 		"Fruit %s (£%.2f) is %s.\n", 
 		stack_fruit.name, stack_fruit.price, taste_type(stack_fruit.taste)
 	);
+
+	// Heap struct
+	fruit_t* heap_fruit = (fruit_t*) malloc(sizeof(fruit_t*));
+
+	char* fruit_name = "Lemon";
+	heap_fruit -> name = (char*) malloc(strlen(fruit_name) + 1);
+	strcpy(heap_fruit -> name, fruit_name);
+
+	heap_fruit -> price = 0.43;
+	heap_fruit -> taste = 0;
 
 	printf(
 		"Fruit %s (£%.2f) is %s.\n", 
@@ -41,7 +41,7 @@ void allocate_fruit() {
 }
 
 
-char * taste_type(taste_t taste) {
+char* taste_type(taste_t taste) {
 	switch(taste) {
 		case sour:
 			return "sour";

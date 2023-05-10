@@ -26,10 +26,10 @@ int main(int argc, char *argv[])
 	for (unsigned int i = 0; i < *product_count; i++) {
 		insert_into_trie(&root_node, &products[i]);
 	}
-
-	// TODO: Decide whether to print trie or not?
-	print_if(VERBOSE, "%s", "\nPrinting trie...\n");
-	print_trie(&root_node);
+	if (VERBOSE) {
+		print("\nPrinting trie...\n");
+	 	print_trie(&root_node, 0, 0);
+	}
 
 	printf("\nSearching for MVP produdct (%s) in database...\n", mvp.name);
 

@@ -62,4 +62,5 @@ To add a screenshot, create an `assets/images` folder in your repository and upl
 - Assign free'd pointers to NULL or handle somehow
 - Do not use arrays in structs, change tp pointrts
 - malloc free in insert_into_trie not working
+- consistent asterisk placement
 
