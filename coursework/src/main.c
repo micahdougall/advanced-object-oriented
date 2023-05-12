@@ -7,8 +7,18 @@ int main(int argc, char *argv[])
 		printf("Missing required argument for input file.\n");
 		exit(EXIT_FAILURE);
 	}
-
 	char *file_name = argv[1];
+	printf("%d\n", argc);
+	for (unsigned int i = 2; i < (argc); i++) {
+		printf("%s\n", argv[i]);
+		char option = *argv[i];
+		switch (option) {
+			case 'V':
+				VERBOSE = true;
+				break;
+		}
+	}
+
 	unsigned int *product_count = (unsigned int *) malloc(sizeof(unsigned int *));
 
 	product_t *products = parse_products_from_file(file_name, product_count);
@@ -27,12 +37,13 @@ int main(int argc, char *argv[])
 		insert_into_trie(&root_node, &products[i]);
 	}
 	if (VERBOSE) {
-		print("\nPrinting trie...\n");
-	 	print_trie(&root_node, 0, 0);
+		printf("\nPrinting trie...\n");
+		// bool draw_path_arr[] = {true};
+		char* edges = "";
+	 	print_trie(&root_node, 0, 0, edges);
 	}
 
 	printf("\nSearching for MVP produdct (%s) in database...\n", mvp.name);
-
 	char search_continue;
 	unsigned int search_code = mvp.code;
 
@@ -50,14 +61,14 @@ int main(int argc, char *argv[])
 			printf("No product found with code %u!\n", search_code);
 		}
 
-		// TODO: Convert to fgets and sscanf for robustness
-		printf("\nSearch for another product? (y/n): ");
-		scanf(" %c", &search_continue);
-		SEARCH_MODE = (search_continue == 'y') ? true : false;
-		//TODO: Break from loop instead
+	// 	// TODO: Convert to fgets and sscanf for robustness
+	// 	printf("\nSearch for another product? (y/n): ");
+	// 	scanf(" %c", &search_continue);
+	// 	SEARCH_MODE = (search_continue == 'y') ? true : false;
+	// 	//TODO: Break from loop instead
 
-		printf("\nPlease enter product code to search: ");
-		scanf("%u", &search_code);
+	// 	printf("\nPlease enter product code to search: ");
+	// 	scanf("%u", &search_code);
 	} while (SEARCH_MODE);
 
 
