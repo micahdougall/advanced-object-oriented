@@ -2,20 +2,19 @@
 
 /**
  * Trie - Stores a product along with its calculated score.
- * @children: Array or pointers to .
- * @score: Its score.
+ * @children: Array of pointers to other trie_node objects.
+ * @product: A pointer to a product attached to this node.
  * 
  * Simplified with typedef product_ext.
  */
 typedef struct Trie {
 	struct Trie** children;
 	product_t* product;
-	int test;
 } trie_node;
 
 
 /**
- * print_trie() - Prints a Trie structure.
+ * print_trie() - Prints a Trie structure recursively.
  * @node: A pointer to the node in the trie being printed.
  * @indent: Amount to indent the child (depth level).
  * @child_idx: The index of the child node being printed
@@ -26,33 +25,30 @@ typedef struct Trie {
 void print_trie(
 	trie_node* node, unsigned int child_idx, unsigned int depth, char* edges
 ) {
-	// Product name string if exists
-	// char* product_name = (node -> product)
-		// ? (node -> product) -> name
-		// : "";
-	// unsigned int product_code = (node -> product)
-		// ? *(node -> product) -> code
-		// ? 1
-		// : NULL;
-	// unsigned int product_code = 1
-	// char* int product_code = (node -> product) ? (node -> product) -> code : NULL;
-	char* product_code = (char*) malloc(sizeof(char) * 12);
+	// Product name string if exists.
+	char* product_name = (node -> product)
+		? (node -> product) -> name
+		: "";
+	// Root node as asterisk in graph.
+	char digit = (depth == 0)
+		? '*'
+		: child_idx + '0';
 
-	if (node -> product) {
-		sprintf(product_code, " -> %d", (node -> product) -> code);
-	} else {
-		product_code = "";
-	}
+	printf(
+		ANSI_COLOR_CYAN "%s" 
+		ANSI_COLOR_GREEN_BOLD "%c" 
+		ANSI_BOLD_WHITE " %s\n"
+		ANSI_COLOR_RESET, 
+		edges, digit, product_name
+	);
 
-	// printf("%s%u %s\n", edges, child_idx, product_name);
-	printf("%s%u %s\n", edges, child_idx, product_code);
-
-	// Array of edges for child nodes as a count of children for each position
-	char* children_edges = (char*) malloc(sizeof(char) * depth * 2 + 2);
-	for (unsigned int i = 0; i <= depth * 2; i++) {
+	// Prepare graph edges for all children.
+	char* children_edges = (char*) malloc(strlen(edges));
+	for (unsigned int i = 0; i < depth * 2; i++) {
 		children_edges[i] = (edges[i] == '\\') ? ' ' : edges[i];
 	}
 
+	// Get last child index for each parent prior to main loop.
 	unsigned int last;
 	for (unsigned int j = 0; j < 10; j++) {
 		if (node -> children[j]) {
@@ -60,61 +56,22 @@ void print_trie(
 		}
 	}
 
-	// Print each child
+	// Print each child .
 	for (unsigned int i = 0; i < 10; i++) {
 		if (node -> children[i]) {
 
-			// Get last child position
-			// unsigned int last;
-			// for (unsigned int j = 0; j < 10; j++) {
-			// 	if ((node -> children[i]) -> children[j]) {
-			// 		last = j;
-			// 	}
-			// }
-			// printf("For child %u, last is %u\n", i, last);
-
-
-			char* child_edges = (char*) malloc(strlen(children_edges) + 2);
+			char* child_edges = (char*) malloc(strlen(children_edges) + 1);
 			strcpy(child_edges, children_edges);
+			strcat(
+				child_edges, 
+				(i == last) ? " \\" : "|\\"
+			);
 
-			// char* append = (char*) malloc(sizeof(char) * 2);
-			// append = (i == last) 
-				// ? " \\" 
-				// : "|\\";
-
-
-
-			if (i == last) {
-				strcat(child_edges, "\\" );
-			} else {
-				strcat(child_edges, "|\\" );
-			}
-			// strcat(child_edges, append);
-			// free(append);
-
-			if (child_idx <= 100) {
-				print_trie(node -> children[i], i, depth + 1, child_edges);
-			}
+			print_trie(node -> children[i], i, depth + 1, child_edges);
 		}
 	}
 }
 
-// For child 1, last is 7
-// For child 2, last is 8
-// For child 6, last is 4
-// For child 3, last is 8
-// For child 8, last is 1
-// For child 1, last is 6
-// For child 6, last is 0
-// For child 0, last is 9
-// For child 9, last is 1277329409
-// For child 4, last is 1
-// For child 1, last is 0
-// For child 0, last is 7
-// For child 7, last is 2
-// For child 2, last is 0
-// For child 0, last is 7
-// For child 7, last is 1662615553
 
 /**
  * lookup_product() - Searches for a specified product in a Trie structure.
@@ -137,7 +94,8 @@ product_t* lookup_product(trie_node* node, unsigned int product_code) {
 	} else {
 		for (unsigned int i = 0; i < 10; i++) {
 			if (node -> children[i]) {
-				product_t *product = lookup_product(node -> children[i], product_code);
+				product_t *product = 
+					lookup_product(node -> children[i], product_code);
 
 				if (product) {
 					return product;
@@ -174,7 +132,8 @@ void insert_into_trie(trie_node* root_node, product_t* product) {
 
 			// Create new child node
 			trie_node* new_node = (trie_node*) malloc(sizeof(trie_node*));
-			trie_node** children = (trie_node**) malloc(sizeof(trie_node**) * 10);
+			trie_node** children = 
+				(trie_node**) malloc(sizeof(trie_node**) * 10);
 
 			// Update pointers
 			new_node -> children = children;

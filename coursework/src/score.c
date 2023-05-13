@@ -28,6 +28,11 @@ typedef struct Score {
 product_t most_valued_product(product_t *products, int product_count) {
 	product_ext mvp;
 
+
+	print_if(
+		VERBOSE, 
+		ANSI_COLOR_CYAN_BOLD "\n\n%s\n" ANSI_COLOR_RESET, "All scores:"
+	);
 	for (unsigned int i = 0; i < product_count; i++) {
 		product_t product = products[i];
 		product_ext product_score = {
@@ -38,9 +43,14 @@ product_t most_valued_product(product_t *products, int product_count) {
 		};
 
 		// Verbose print out for each product score.
-		char log_message[MAX_LINE];
-		sprintf(log_message, "%s has score of %f\n", product.name, product_score.score);
-		print_if(VERBOSE, "%s", log_message);
+		if (VERBOSE) {
+			printf(
+				"%s has score of "
+				ANSI_BOLD_WHITE "%f\n"
+				ANSI_COLOR_RESET,
+				product.name, product_score.score
+			);
+		}
 
 		// For each product, replace MVP if score has improved.
 		mvp = (product_score.score > mvp.score) ? product_score : mvp;

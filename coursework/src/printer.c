@@ -21,7 +21,7 @@ void print_stock_report(product_t *products, unsigned int product_count) {
 	printf(
 		ANSI_COLOR_CYAN_BOLD
 		"      %-10s %6s %9s %-3s %-s\n      " 
-		"----------------------------------------------------------------\n"
+		"--------------------------------------------------------------------\n"
 		ANSI_COLOR_RESET, 
 		"Code", "Stock", "Price", "Dsct", "Product"
 	);
@@ -37,7 +37,7 @@ void print_stock_report(product_t *products, unsigned int product_count) {
 		printf(
 			ANSI_BOLD_WHITE "\n     **** %u products not printed ***\n\n"
 			ANSI_COLOR_RESET, 
-			product_count - (REPORT_PREVIEW - 1)
+			product_count - (REPORT_PREVIEW + 1)
 		);
 		print_product(products[product_count - 1]);
 	}

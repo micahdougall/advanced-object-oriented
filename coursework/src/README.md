@@ -1,15 +1,59 @@
-# CSF307 Advanced Object-Oriented Programming - Coursework 1 🏆
+# CSF307 Advanced Object-Oriented Programming - Coursework 1
+<p align="center">
+  <img src="rubber-duck.png" alt="drawing" width="100"/><br><br>
+  <img src="https://img.shields.io/github/followers/micahdougall?style=social" alt="drawing" width="100"/>
+</p>
 
-![GitHub followers](https://img.shields.io/github/followers/micahdougall?style=social)
 
 
-## Table of Contents (Optional)
 
-If your README is long, add a table of contents to make it easy for users to find what they need.
+## 
 
-- [System](#system)
+Brief summary to program arguments, options and execution.
+
 - [Usage](#usage)
+- [System](#system)
 - [References](#usage)
+
+
+
+## Usage
+
+**main** has a required (first) argument which should be the name of a local file containing products., eg:
+
+```bash
+./main T5-Products-10.txt
+```
+
+
+
+```mermaid
+| | |\2
+| | |  \8
+| | |    \2
+| | |      \9
+| | |        \1
+| | |          \0
+| | |            \3 Brabantia_Ironing_Board_Cover
+| | |\3
+| | | |\5
+| | | |  \1
+| | | |    \3
+| | | |      \6
+| | | |        \0
+| | | |          \3 All-Clad_Stockpot
+| | |  \6
+| | |   |\0
+| | |   |  \9
+| | |   |    \6
+| | |   |      \6
+| | |   |        \4 Yellow_Bell_Pepper
+| | |    \4
+| | |      \1
+| | |        \4
+| | |          \7
+| | |            \4 Pyrex_Glass_Baking_Dish
+```
 
 
 ## System
@@ -24,35 +68,15 @@ This code has been developed using Sublime text editor and tested in CLion.
     Thread model: posix
     ```
 
-## Usage
-
-main.c takes a single argument as an input file containing products., eg:
-
-```bash
-./main T5-Products-10.txt
-```
-
-To add a screenshot, create an `assets/images` folder in your repository and upload your screenshot to it. Then, using the relative filepath, add it to your README using the following syntax:
-
-    ```md
-    ![alt text](assets/images/screenshot.png)
-    ```
----
-
-
-
 ## References for tutorials/conventions used
 
 - https://www.gnu.org/software/gnu-c-manual/gnu-c-manual.html
 - https://www.gnu.org/prep/standards/html_node/Writing-C.html
-
+- https://www.flaticon.com/free-icons/rubber-duck
 
 ## TODO
 
-- Tidy up Trie logic
 - Exit gracefully
-- Comments for Trie
-- Trie pretty print
 - Function for interface
 - free() memory
 - Makefile clean and args for verbosity
