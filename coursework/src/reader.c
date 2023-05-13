@@ -17,12 +17,12 @@
  * 
  * Return: A pointer to an array of products where the data has been stored.
  */
-product_t * parse_products_from_file(char *file_name, unsigned int *product_count) {
-	char *file_path = realpath(file_name, NULL);
+product_t* parse_products_from_file(char* file_name, unsigned int* product_count) {
+	char* file_path = realpath(file_name, NULL);
 
 	if (file_path != NULL) {
 
-		FILE *file = fopen(file_path, "r");
+		FILE* file = fopen(file_path, "r");
 
 		unsigned int record_count;
 		fscanf(file, "%u\n", &record_count);
@@ -33,7 +33,7 @@ product_t * parse_products_from_file(char *file_name, unsigned int *product_coun
 		sprintf(log_message, "%s contains %u records.\n\n", file_name, record_count);
 		print_if(VERBOSE, "%s", log_message);
 
-		product_t *products = (product_t*) malloc(sizeof(product_t) * record_count);
+		product_t* products = (product_t*) malloc(sizeof(product_t) * record_count);
 
 		print_if(VERBOSE, "Memory allocated at %p...", products);
 		print_if(VERBOSE, "%s", "reading in products...");
@@ -44,13 +44,22 @@ product_t * parse_products_from_file(char *file_name, unsigned int *product_coun
 				unsigned int stock;
 				float price;
 				float discount;
-				char name[PRODUCT_NAME_LENGTH];
+				char* raw_name = (char*) malloc(sizeof(char) * PRODUCT_NAME_LENGTH);
+				char* spaced_name = (char*) malloc(sizeof(char) * PRODUCT_NAME_LENGTH);
 
 				fscanf(
 					file, 
 					"%u %u %f %f %s\n", 
-					&code, &stock, &price, &discount, name
+					&code, &stock, &price, &discount, raw_name
 				);
+
+				// Transform product name.
+				for (unsigned int i = 0; i < strlen(raw_name); i++){
+					spaced_name[i] = (raw_name[i] == '_')
+						? ' '
+						: raw_name[i];
+				}
+				free(raw_name);
 
 				product_t product = {
 					.code = code,
@@ -58,7 +67,8 @@ product_t * parse_products_from_file(char *file_name, unsigned int *product_coun
 					.price = price,
 					.discount = discount
 				};
-				strcpy(product.name, name);
+				strcpy(product.name, spaced_name);
+				free(spaced_name);
 
 				products[i] = product;
 			} else {

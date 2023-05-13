@@ -22,17 +22,18 @@ typedef struct Score {
  *  - stock: less is better
  *  - price: higher is better
  *  - discount: higher is better
+ * 
+ * Passes-by-value as the Product struct is small.
  *  
  * Returns: The product with the best score.
  */
-product_t most_valued_product(product_t *products, int product_count) {
-	product_ext mvp;
-
-
+product_t most_valued_product(product_t* products, int product_count) {
 	print_if(
 		VERBOSE, 
 		ANSI_COLOR_CYAN_BOLD "\n\n%s\n" ANSI_COLOR_RESET, "All scores:"
 	);
+
+	product_ext mvp;
 	for (unsigned int i = 0; i < product_count; i++) {
 		product_t product = products[i];
 		product_ext product_score = {
@@ -61,8 +62,7 @@ product_t most_valued_product(product_t *products, int product_count) {
 		ANSI_COLOR_RESET "with a score of "
 		ANSI_BOLD_WHITE "%f\n\n"
 		ANSI_COLOR_RESET, 
-		mvp.product.name, 
-		mvp.score
+		mvp.product.name, mvp.score
 	);
 	return mvp.product;
 }

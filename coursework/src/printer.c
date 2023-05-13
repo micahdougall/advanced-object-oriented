@@ -3,6 +3,7 @@
 
 #define REPORT_PREVIEW 5
 
+
 /**
  * print_stock_report() - Prints a report for a list of products.
  * @*products: A pointer to an array of products.
@@ -15,12 +16,10 @@
  * 	- <= 10 products -> all products printed
  *	-  > 10 products -> first 5 and last 2 printed
  */
-void print_stock_report(product_t *products, unsigned int product_count) {
+void print_stock_report(product_t* products, unsigned int product_count) {
 	printf("\nPrinting stock report for product import:\n\n");
-
 	printf(
-		ANSI_COLOR_CYAN_BOLD
-		"      %-10s %6s %9s %-3s %-s\n      " 
+		ANSI_COLOR_CYAN_BOLD "      %-10s %6s %9s %-3s %-s\n      " 
 		"--------------------------------------------------------------------\n"
 		ANSI_COLOR_RESET, 
 		"Code", "Stock", "Price", "Dsct", "Product"
@@ -56,7 +55,7 @@ void print_product(product_t product) {
 		ANSI_COLOR_MAGENTA "%3.0f%% "
 		ANSI_COLOR_GREEN "%s\n"
 		ANSI_COLOR_RESET, 
-		product.code, product.stock, product.price, 
-		product.discount * 100, product.name
+		product.code, product.stock, product.price, product.discount * 100, 
+		product.name
 	);
 }
