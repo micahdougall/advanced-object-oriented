@@ -135,7 +135,7 @@ product_t* lookup_product(trie_node* node, unsigned int product_code) {
 
 
 /**
- * free_trie_memory() - Frees the heap memory allocated to a trie or sub-trie.
+ * free_the_children() - Frees the heap memory allocated to a trie or sub-trie.
  * @node: A pointer to the root node of the trie.
  * 
  * Assuming the root node of a trie is passed to the function, it will iterate 

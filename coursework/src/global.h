@@ -26,6 +26,9 @@
 #endif
 
 
+bool VERBOSE;
+
+
 /**
  * print_if() - Prints if a condition is true.
  * @condition: Condition to check, eg a bool.
@@ -37,6 +40,3 @@
 #define print_if(condition, format, value) condition \
     ? printf(format, value) \
     : (void)0;
-
-
-bool VERBOSE;

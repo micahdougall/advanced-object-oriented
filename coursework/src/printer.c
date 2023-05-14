@@ -41,6 +41,7 @@ void print_stock_report(product_t* products, unsigned int product_count) {
 	}
 }
 
+
 /**
  * print_product() - Prints a single product in the required format.
  * @product: The data for a product type (product_t).

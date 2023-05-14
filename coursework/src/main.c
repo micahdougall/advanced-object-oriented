@@ -25,7 +25,8 @@ int main(int argc, char* argv[])
 
 	// Read products from file (pointer to products is constant).
 	unsigned int* product_count = (unsigned int*) malloc(sizeof(unsigned int*));
-	product_t* const products = parse_products_from_file(file_name, product_count);
+	product_t* const products = 
+		parse_products_from_file(file_name, product_count);
 
 	// Print report / sample report.
 	print_stock_report(products,*product_count);
@@ -64,6 +65,13 @@ int main(int argc, char* argv[])
 }
 
 
+/**
+ * search_product() - Searches for a product in a trie and prints the result.
+ * @root_node: The root node of the trie.
+ * @search_code: The product code of the product to retrieve.
+ * 
+ * Effectively, this is a wrapper for the lookup function to handle the result.
+ */
 void search_product(trie_node* root_node, unsigned int search_code) {
 	product_t* required_product = lookup_product(root_node, search_code);
 
@@ -80,6 +88,13 @@ void search_product(trie_node* root_node, unsigned int search_code) {
 }
 
 
+/**
+ * user_product_search() - Interface for a user to perform product searches.
+ * @root_node: The root node of the trie.
+ * 
+ * This handles the CLI input from the user and provides a loop to search for
+ * multiple products.
+ */
 void user_product_search(trie_node* root_node) {
 	char search_continue;
 	do {
@@ -94,7 +109,3 @@ void user_product_search(trie_node* root_node) {
 		}
 	} while (search_continue == 'y');
 }
-
-
-
-
