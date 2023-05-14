@@ -23,9 +23,9 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	// Read products from file.
+	// Read products from file (pointer to products is constant).
 	unsigned int* product_count = (unsigned int*) malloc(sizeof(unsigned int*));
-	product_t* products = parse_products_from_file(file_name, product_count);
+	product_t* const products = parse_products_from_file(file_name, product_count);
 
 	// Print report / sample report.
 	print_stock_report(products,*product_count);
@@ -33,21 +33,21 @@ int main(int argc, char* argv[])
 	// Calculate best product score.
 	product_t mvp = most_valued_product(products, *product_count);
 
-	// Trie insertion, create root node.
-	trie_node root_node = { 
-		.children = malloc(sizeof(trie_node*) * 10)
-	};
+	// Trie insertion, create root node (const pointer - root never changes).
+	trie_node* const root_node = (trie_node*) malloc(sizeof(trie_node*));
+	root_node -> children = 
+		(trie_node**) malloc(sizeof(trie_node**) * 10);
+
 	print_if(VERBOSE, "\nTrie DB insert (%u products)...", *product_count);
 	for (unsigned int i = 0; i < *product_count; i++) {
-		insert_into_trie(&root_node, &products[i]);
+		insert_into_trie(root_node, &products[i]);
 	}
 	if (VERBOSE) {
 		printf("complete:\n\n");
 		char* edges = "";
-	 	print_trie(&root_node, 0, 0, edges);
+	 	print_trie(root_node, 0, 0, edges);
 	}
 	free(products);
-	products = NULL;
 
 	// Auto print MVP
 	printf("\nSearching for MVP produdct (%s) in database...\n", mvp.name);
@@ -56,12 +56,14 @@ int main(int argc, char* argv[])
 	// User search loop.
 	user_product_search(root_node);
 
+	free_the_children(root_node);
+	free(root_node);
 	return EXIT_SUCCESS;
 }
 
 
-void search_product(trie_node root_node, unsigned int search_code) {
-	product_t* required_product = lookup_product(&root_node, search_code);
+void search_product(trie_node* root_node, unsigned int search_code) {
+	product_t* required_product = lookup_product(root_node, search_code);
 
 	if (required_product != NULL) {
 		printf(
@@ -76,7 +78,7 @@ void search_product(trie_node root_node, unsigned int search_code) {
 }
 
 
-void user_product_search(trie_node root_node) {
+void user_product_search(trie_node* root_node) {
 	char search_continue;
 	do {
 		unsigned int search_code;

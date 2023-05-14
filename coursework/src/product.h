@@ -1,5 +1,6 @@
 #define PRODUCT_NAME_LENGTH 100
 
+
 /**
  * Product - Stores data associated with a product.
  * @code: A unique code for the product,

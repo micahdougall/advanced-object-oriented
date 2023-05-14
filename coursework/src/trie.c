@@ -1,23 +1,10 @@
-#include <math.h>
-
-
-/**
- * Trie - Stores a product along with its calculated score.
- * @children: Array of pointers to other trie_node objects.
- * @product: A pointer to a product attached to this node.
- * 
- * Simplified with typedef product_ext.
- */
-typedef struct Trie {
-	struct Trie** children;
-	product_t* product;
-} trie_node;
+#include "trie.h"
 
 
 /**
  * insert_into_trie() - Inserts an array or products into a Trie structure.
- * @*root_node: A pointer to the root node of the trie.
- * @*product: An array of products to insert into the trie.
+ * @root_node: A pointer to the root node of the trie.
+ * @product: An array of products to insert into the trie.
  * 
  * The algorithm uses the unique product.code to insert each product into the
  * trie where each digit in the code denotes the index for a child node from
@@ -25,7 +12,7 @@ typedef struct Trie {
  */
 void insert_into_trie(trie_node* root_node, product_t* product) {
 
-	// Create string from numeric code (accounting for number size)
+	// Create string from numeric code (accounting for number size).
 	char code_as_str[(int) log10(product -> code) + 1];
 	sprintf(code_as_str, "%i", product -> code);
 
@@ -37,17 +24,15 @@ void insert_into_trie(trie_node* root_node, product_t* product) {
 
 		if (!current_node_ptr -> children[idx]) {
 
-			// Create new child node
+			// Create new child node.
 			trie_node* new_node = (trie_node*) malloc(sizeof(trie_node*));
-			trie_node** children = 
+			new_node -> children = 
 				(trie_node**) malloc(sizeof(trie_node**) * 10);
 
-			// Update pointers
-			new_node -> children = children;
+			// Add new node to parent.
 			current_node_ptr -> children[idx] = new_node;
-
-			*(current_node_ptr -> children[idx]) = *new_node;
 		}
+		// Down the rabbit hole we go.
 		current_node_ptr = current_node_ptr -> children[idx];
 	}
 	current_node_ptr -> product = product;
@@ -99,17 +84,16 @@ void print_trie(
 	}
 
 	// Print each child.
-	// char* child_edges = (char*) malloc(strlen(children_edges) + 1);
+	char* child_edges = (char*) malloc(strlen(children_edges) + 1);
 	for (unsigned int i = 0; i < 10; i++) {
 		if (node -> children[i]) {
-			char* child_edges = (char*) malloc(strlen(children_edges) + 1);
+			// char* child_edges = (char*) malloc(strlen(children_edges) + 1);
 			strcpy(child_edges, children_edges);
 			strcat(
 				child_edges, 
 				(i == last) ? " \\" : "|\\"
 			);
 			print_trie(node -> children[i], i, depth + 1, child_edges);
-			// free(child_edges);
 		}
 	}
 	free(children_edges);
@@ -146,5 +130,22 @@ product_t* lookup_product(trie_node* node, unsigned int product_code) {
 			}
 		}
 		return NULL;
+	}
+}
+
+
+/**
+ * free_trie_memory() - Frees the heap memory allocated to a trie or sub-trie.
+ * @node: A pointer to the root node of the trie.
+ * 
+ * Assuming the root node of a trie is passed to the function, it will iterate 
+ * recursively through the data structure for each child's sub-trie.
+ */
+void free_the_children(trie_node* node) {
+	for (unsigned int i = 0; i < 10; i++) {
+		if (node -> children[i]) {
+			free_the_children(node -> children[i]);
+			free(node -> children[i]);
+		}
 	}
 }

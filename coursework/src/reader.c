@@ -1,8 +1,5 @@
-#include "product.c"
+#include "reader.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 /**
  * parse_products_from_file() - Parses a file to extract products data.

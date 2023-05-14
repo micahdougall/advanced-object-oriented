@@ -5,32 +5,57 @@
 </p>
 
 
-
-
 ## 
 
 Brief summary to program arguments, options and execution.
 
+- [Installation](#installation)
 - [Usage](#usage)
+  - [Optional arguments](#optional-arguments)
+  - [Compile-time arguments](#compile-time-arguments)
 - [System](#system)
 - [References](#usage)
 
 
 ## Installation
 
-This program comes with a [Makefile](Makefile) to (re-)compile source files as needed. To compile using GCC, simply run `make` from the root directory.
+This program comes with a [Makefile](Makefile) to compile source files as needed. To compile using GCC, simply run from the root directory:
+```
+make
+```
 
 All text files used for product input should be placed in the [res/](res/) folder.
 
-To remove executables from [bin/](bin/) and text files from [res/](res/), simply run `make clean` from the command line in the root directory.
+To remove executables from [bin/](bin/) and text files from [res/](res/), simply run from the command line in the root directory:
+```
+make clean
+```
+
 
 ## Usage
 
 The program executable, **main**, will be written to the [bin/](bin/) folder (by Makefile) and has a required (first) argument which should be the name of a text file containing products, eg:
-
 ```bash
 ./bin/main T5-Products-10.txt
 ```
+
+The input file is expected to contain a set of product data in order, separated by a space, so that the following:
+```
+10
+126381609 38574 0.49 0.08 Bisto_Gravy_Granules
+128805147 2 1.09 0.08 Butternut_squash
+*** 8 more rows ***
+```
+
+Becomes:
+
+|Code | Stock | Price | Dsct | Product |
+|--- | --- | ---|---|---|
+|126381609 | 38574 | 0.49 | 0.08 | Bisto Gravy Granules |
+|128805147 | 2 | 1.09 | 0.08 | Butternut squash |
+
+*** 8 more rows ***
+
 
 ### Optional arguments
 
@@ -40,12 +65,26 @@ An *optional* additional argument, **V** can be supplied to run the program in v
   - Score print-out for all products.
   - Graph Trie print-out.
 
+It is highly recommended to avoid verbose mode for large files!
+
 Eg:
 ```bash
 ./bin/main T5-Products-10.txt V
 ```
 
-A sample of a Trie graph print-out can be seen at
+A sample of a Trie graph print-out can be seen at the end of this section.
+
+
+### Compile-time arguments
+
+Product printing for the report, trie and lookup searches all use [color/style enhancements](src/global.h) for printing to the console. These have been chosen with a high-contrast, dark background in mind.
+
+To remove all styles for print outputs, an argument needs to be set at compile time to provide the condition to the preprocessor. When using the [Makefile](Makefile), instead of `make`, simply run:
+```
+make plain
+``` 
+
+Sample trie graph:
 
 ```
 | | |\2
@@ -75,11 +114,6 @@ A sample of a Trie graph print-out can be seen at
 | | |            \4 Pyrex_Glass_Baking_Dish
 ```
 
-### Compile-time arguments
-
-Product printing for the report, trie and lookup searches all use color/style enhancements for printing to the console. These have been chosen with a dark background in mind.
-
-To remove all styles for print outputs, an argument needs to be set at compile time to provide the condition to the preprocessor. When using the [Makefile](Makefile), simply run `make plain` instead of `make`. 
 
 ## System
 
@@ -95,18 +129,16 @@ This code has been developed using:
     Thread model: posix
     ```
 
+
 ## References
 
 - https://www.gnu.org/software/gnu-c-manual/gnu-c-manual.html
 - https://www.gnu.org/prep/standards/html_node/Writing-C.html
 - https://www.flaticon.com/free-icons/rubber-duck
 
+
 ## TODO
 
-- Resize buffers for the strings
-- Do not use arrays in structs, change tp pointrts
-- free() malloc free in insert_into_trie & print_trie not working
-- const ref for pointers
-- cleanup: colors not needed, global vars, method spacing, gcc options in readme, calloc
+- Resize buffers for the strings (optimal)
 - Bug in trie print for 300
 

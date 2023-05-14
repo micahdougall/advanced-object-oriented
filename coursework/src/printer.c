@@ -1,12 +1,11 @@
 #include "printer.h"
-#include "global.h"
 
 #define REPORT_PREVIEW 5
 
 
 /**
  * print_stock_report() - Prints a report for a list of products.
- * @*products: A pointer to an array of products.
+ * @products: A pointer to an array of products.
  * @product_count: The number of products in the array.
  * 
  * The report size will depend on the number of products and the options set.
