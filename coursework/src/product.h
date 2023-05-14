@@ -1,6 +1,3 @@
-#define PRODUCT_NAME_LENGTH 100
-
-
 /**
  * Product - Stores data associated with a product.
  * @code: A unique code for the product,
@@ -16,6 +13,5 @@ typedef struct Product {
 	unsigned int stock;
 	float price;
 	float discount;
-    // char name[PRODUCT_NAME_LENGTH];
 	char* name;
 } product_t;

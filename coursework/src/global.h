@@ -1,6 +1,7 @@
 #include <stdbool.h>
 
 #define MAX_LINE 1000
+#define MAX_PRODUCT_NAME_LENGTH 100
 
 
 // Colors set according to compile-time args

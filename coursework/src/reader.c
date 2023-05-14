@@ -4,17 +4,21 @@
 /**
  * parse_products_from_file() - Parses a file to extract products data.
  * @file_name: The file name or filep path of the file to parse.
- * @*product_count: A pointer to store he number of products contained in the file data.
+ * @*product_count: A pointer to store he number of products contained in the 
+ * file data.
  * 
- * Assumes that the file is in the local directory unless a relative path is passed.
- * The first line of the file should contain the number of records, following which the 
- * file should contain a single product per line.
+ * Assumes that the file is in the local directory unless a relative path is 
+ * passed.
+ * The first line of the file should contain the number of records, following 
+ * which the file should contain a single product per line.
  * 
  * Will return unsuccessful if the number of records does not match the header.
  * 
  * Return: A pointer to an array of products where the data has been stored.
  */
-product_t* parse_products_from_file(char* file_name, unsigned int* product_count) {
+product_t* parse_products_from_file(
+	char* file_name, unsigned int* product_count
+) {
 	char* file_path = realpath(file_name, NULL);
 
 	if (file_path != NULL) {
@@ -27,10 +31,14 @@ product_t* parse_products_from_file(char* file_name, unsigned int* product_count
 
 		// Verbose print out for file record count.
 		char log_message[MAX_LINE];
-		sprintf(log_message, "%s contains %u records.\n\n", file_name, record_count);
+		sprintf(
+			log_message, 
+			"%s contains %u records.\n\n", file_name, record_count
+		);
 		print_if(VERBOSE, "%s", log_message);
 
-		product_t* products = (product_t*) malloc(sizeof(product_t) * record_count);
+		product_t* products = 
+			(product_t*) malloc(sizeof(product_t) * record_count);
 
 		print_if(VERBOSE, "Memory allocated at %p...", products);
 		print_if(VERBOSE, "%s", "reading in products...");
@@ -41,7 +49,8 @@ product_t* parse_products_from_file(char* file_name, unsigned int* product_count
 				unsigned int stock;
 				float price;
 				float discount;
-				char* raw_name = (char*) malloc(sizeof(char) * PRODUCT_NAME_LENGTH);
+				char* raw_name = 
+					(char*) malloc(sizeof(char) * MAX_PRODUCT_NAME_LENGTH);
 
 				fscanf(
 					file, 
@@ -54,26 +63,30 @@ product_t* parse_products_from_file(char* file_name, unsigned int* product_count
 					.stock = stock,
 					.price = price,
 					.discount = discount,
-					.name = (char*) malloc(sizeof(char) * (strlen(raw_name) + 1))
+					.name = (char*) malloc(
+						sizeof(char) * (strlen(raw_name) + 1))
 				};
-				// Transform product name.
+				// Remove spaces from product name.
 				for (unsigned int i = 0; i < strlen(raw_name); i++){
 					product.name[i] = (raw_name[i] == '_')
 						? ' '
 						: raw_name[i];
 				}
 				free(raw_name);
-				printf("%s\n", product.name);
 
 				products[i] = product;
 			} else {
-				printf("Unexpected record count! EOF reached after %u records\n", i);
+				printf(
+					"Unexpected record count! EOF reached after %u records\n", 
+					i
+				);
 				exit(-1);
 			}
 		}
 		if (!feof(file)) {
 			printf(
-				"Additional data found after record %u, please check file header\n", 
+				"Additional data found after record %u, "
+				"please check file header\n", 
 				record_count
 			);
 			exit(-1);
