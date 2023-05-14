@@ -47,7 +47,6 @@ int main(int argc, char* argv[])
 		char* edges = "";
 	 	print_trie(root_node, 0, 0, edges);
 	}
-	free(products);
 
 	// Auto print MVP
 	printf("\nSearching for MVP produdct (%s) in database...\n", mvp.name);
@@ -56,8 +55,11 @@ int main(int argc, char* argv[])
 	// User search loop.
 	user_product_search(root_node);
 
+	// Clear memory
 	free_the_children(root_node);
 	free(root_node);
+	free(products);
+
 	return EXIT_SUCCESS;
 }
 

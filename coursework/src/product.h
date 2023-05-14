@@ -16,5 +16,6 @@ typedef struct Product {
 	unsigned int stock;
 	float price;
 	float discount;
-	char name[PRODUCT_NAME_LENGTH];
+    // char name[PRODUCT_NAME_LENGTH];
+	char* name;
 } product_t;

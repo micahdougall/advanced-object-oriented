@@ -42,7 +42,6 @@ product_t* parse_products_from_file(char* file_name, unsigned int* product_count
 				float price;
 				float discount;
 				char* raw_name = (char*) malloc(sizeof(char) * PRODUCT_NAME_LENGTH);
-				char* spaced_name = (char*) malloc(sizeof(char) * PRODUCT_NAME_LENGTH);
 
 				fscanf(
 					file, 
@@ -50,22 +49,21 @@ product_t* parse_products_from_file(char* file_name, unsigned int* product_count
 					&code, &stock, &price, &discount, raw_name
 				);
 
-				// Transform product name.
-				for (unsigned int i = 0; i < strlen(raw_name); i++){
-					spaced_name[i] = (raw_name[i] == '_')
-						? ' '
-						: raw_name[i];
-				}
-				free(raw_name);
-
 				product_t product = {
 					.code = code,
 					.stock = stock,
 					.price = price,
-					.discount = discount
+					.discount = discount,
+					.name = (char*) malloc(sizeof(char) * (strlen(raw_name) + 1))
 				};
-				strcpy(product.name, spaced_name);
-				free(spaced_name);
+				// Transform product name.
+				for (unsigned int i = 0; i < strlen(raw_name); i++){
+					product.name[i] = (raw_name[i] == '_')
+						? ' '
+						: raw_name[i];
+				}
+				free(raw_name);
+				printf("%s\n", product.name);
 
 				products[i] = product;
 			} else {
