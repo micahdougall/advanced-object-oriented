@@ -4,17 +4,16 @@
   <img src="https://img.shields.io/github/followers/micahdougall?style=social" alt="drawing" width="100"/>
 </p>
 
-
-## 
-
 Brief summary to program arguments, options and execution.
+
+A read-only copy of the repository can be accessed on GitFront (see [References](#references)).
 
 - [Installation](#installation)
 - [Usage](#usage)
   - [Optional arguments](#optional-arguments)
   - [Compile-time arguments](#compile-time-arguments)
 - [System](#system)
-- [References](#usage)
+- [References](#references)
 
 
 ## Installation
@@ -135,3 +134,4 @@ This code has been developed using:
 - https://www.gnu.org/software/gnu-c-manual/gnu-c-manual.html
 - https://www.gnu.org/prep/standards/html_node/Writing-C.html
 - https://www.flaticon.com/free-icons/rubber-duck
+- https://gitfront.io/r/user-8542067/SE98YnTAwUMt/advanced-object-oriented/
