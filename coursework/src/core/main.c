@@ -57,7 +57,7 @@ int main(int argc, char* argv[])
 	user_product_search(root_node);
 
 	// Clear memory
-	free_the_children(root_node);
+	free_nodes_memory(root_node);
 	free(root_node);
 	free(products);
 

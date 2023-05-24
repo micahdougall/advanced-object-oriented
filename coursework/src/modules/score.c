@@ -43,7 +43,7 @@ product_t* most_valued_product(product_t* products, int product_count) {
 		}
 
 		// For each product, replace MVP if score has improved.
-		mvp = (product_score.score > mvp -> score) ? &product_score : mvp;
+		*mvp = (product_score.score > (mvp -> score)) ? product_score : *mvp;
 	}
 	printf(
 		"\nMost valued product is "

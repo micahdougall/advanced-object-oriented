@@ -56,6 +56,8 @@ Becomes:
 *** 8 more rows ***
 
 
+After printing the report and identifying the most valued product (according the calculated score) the program will offer the user the option to continue searching for products within the trie. Please use (y/n) to select and enter the product code to search.
+
 ### Optional arguments
 
 An *optional* additional argument, **V** can be supplied to run the program in verbose mode. This mode includes additional print outs:
@@ -125,14 +127,13 @@ This code has been developed using:
     Thread model: posix
     ```
 
-## TODO
-- argv[0] undefined
-- realloca for loop
-
-
 ## References
 
 - https://www.gnu.org/software/gnu-c-manual/gnu-c-manual.html
 - https://www.gnu.org/prep/standards/html_node/Writing-C.html
 - https://www.flaticon.com/free-icons/rubber-duck
+
+
+## Repository links
+- https://github.com/micahdougall/advanced-object-oriented/tree/main
 - https://gitfront.io/r/user-8542067/SE98YnTAwUMt/advanced-object-oriented/

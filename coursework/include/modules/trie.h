@@ -19,4 +19,4 @@ void print_trie(
 	trie_node* node, unsigned int child_idx, unsigned int depth, char* edges
 );
 product_t* lookup_product(trie_node* node, unsigned int product_code);
-void free_the_children(trie_node* node);
+void free_nodes_memory(trie_node* node);

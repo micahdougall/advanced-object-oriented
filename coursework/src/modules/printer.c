@@ -24,7 +24,7 @@ void print_stock_report(product_t* products, unsigned int product_count) {
 		"Code", "Stock", "Price", "Dsct", "Product"
 	);
 
-	if (VERBOSE || product_count <= 9) {
+	if (VERBOSE || product_count <= 10) {
 		for (unsigned int i = 0; i < product_count; i++) {
 			print_product(products[i]);
 		}
