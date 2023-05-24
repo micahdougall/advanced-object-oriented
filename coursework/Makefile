@@ -1,11 +1,12 @@
-CC = gcc
-src_files = src/main.c src/product.h src/reader.c src/printer.c src/score.c src/trie.c src/global.h
+CC=gcc
+SRC_FILES=src/core/main.c include/modules//product.h src/modules/reader.c src/modules/printer.c src/modules/score.c src/modules/trie.c include/modules/global.h
+INCLUDES=include/core/ include/modules/ src/modules
 
-main: $(src_files)
-	$(CC) src/main.c -o bin/main
+main: $(SRC_FILES)
+	$(CC) $(foreach path, $(INCLUDES), -I $(path)) src/core/main.c -o bin/main
 
-plain: $(src_files)
-	$(CC) src/main.c -o bin/main -D PRINTED_TEXT=PLAIN
+plain: $(SRC_FILES)
+	$(CC) $(foreach path, $(INCLUDES), -I $(path)) src/core/main.c -o bin/main -D PRINTED_TEXT=PLAIN
 
 clean:
 	rm -f bin/* res/*.txt

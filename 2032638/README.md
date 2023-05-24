@@ -71,6 +71,18 @@ Eg:
 ./bin/main T5-Products-10.txt V
 ```
 
+A sample of a Trie graph print-out can be seen at the end of this section.
+
+
+### Compile-time arguments
+
+Product printing for the report, trie and lookup searches all use [color/style enhancements](src/global.h) for printing to the console. These have been chosen with a high-contrast, dark background in mind.
+
+To remove all styles for print outputs, an argument needs to be set at compile time to provide the condition to the preprocessor. When using the [Makefile](Makefile), instead of `make`, simply run:
+```
+make plain
+``` 
+
 Sample trie graph:
 
 ```
@@ -102,15 +114,6 @@ Sample trie graph:
 ```
 
 
-### Compile-time arguments
-
-Product printing for the report, trie and lookup searches all use [color/style enhancements](include/modules/global.h) for printing to the console. These have been chosen with a high-contrast, dark background in mind.
-
-To remove all styles for print outputs, an argument needs to be set at compile time to provide the condition to the preprocessor. When using the [Makefile](Makefile), instead of `make`, simply run:
-```
-make plain
-```
-
 ## System
 
 This code has been developed using:
@@ -124,10 +127,6 @@ This code has been developed using:
     Target: arm64-apple-darwin22.3.0
     Thread model: posix
     ```
-
-## TODO
-- argv[0] undefined
-- realloca for loop
 
 
 ## References

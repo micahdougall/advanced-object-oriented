@@ -27,7 +27,7 @@ void allocate_fruit() {
 	fruit_t* heap_fruit = (fruit_t*) malloc(sizeof(fruit_t*));
 
 	char* fruit_name = "Lemon";
-	heap_fruit -> name = (char*) malloc(strlen(fruit_name) + 1);
+	heap_fruit -> name = (char*) malloc(sizeof char * (strlen(fruit_name) + 1));
 	strcpy(heap_fruit -> name, fruit_name);
 
 	heap_fruit -> price = 0.43;
@@ -37,6 +37,7 @@ void allocate_fruit() {
 		"Fruit %s (£%.2f) is %s.\n", 
 		heap_fruit -> name, heap_fruit -> price, taste_type(heap_fruit -> taste)
 	);
+	free(heap_fruit -> name);
 	free(heap_fruit);
 }
 
@@ -54,7 +55,7 @@ char* taste_type(taste_t taste) {
 
 void populate_tables(unsigned int a, unsigned int b) {
 
-	int** table = (int**) malloc(sizeof(int*) * 1);
+	int** table = (int**) malloc(sizeof(int*) * a);
 
 	for (unsigned int i = 0; i < a; i++) {
 		int* row = (int*) malloc(sizeof(int) * b);
@@ -68,5 +69,9 @@ void populate_tables(unsigned int a, unsigned int b) {
 	printf("Table at [%u][%u] = %u\n", 3, 3, table[3][3]);
 	printf("Table at [%u][%u] = %u\n", 9, 2, table[9][2]);
 	printf("Table at [%u][%u] = %u\n", 6, 4, table[6][4]);
+
+	for (unsigned char i = 0; i < b; i++) {
+		free(table[i]);
+	}
 	free(table);
 }
