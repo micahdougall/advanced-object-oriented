@@ -1,0 +1,32 @@
+package org.example.util;
+
+import javafx.scene.layout.CornerRadii;
+import org.example.controller.DeliveryManager;
+import org.example.entities.Coordinate;
+import org.example.entities.DeliveryRoute;
+
+import java.util.*;
+
+public class ArtifactPrinter {
+
+    public static <E> void printReport(Collection<E> artifacts) {
+        System.out.printf("Printing report for %d artifacts...\n", artifacts.size());
+
+        for (E record : artifacts) {
+            System.out.printf("\t->%s\n", record);
+        }
+    }
+
+    public static void findRoutes(DeliveryManager manager) {
+        Coordinate start = new Coordinate(50, 95);
+        Coordinate end = new Coordinate(62, 14);
+
+        Optional<DeliveryRoute> optional = manager.findRoute(start, end);
+
+        try {
+            System.out.printf("Route for coordinates: (%s -> %s) => %s\n", start, end, optional.get());
+        } catch (NoSuchElementException e) {
+            System.out.printf("Item not found for coordinates: (%s -> %s)\n", start, end);
+        }
+    }
+}

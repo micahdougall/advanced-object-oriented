@@ -4,7 +4,7 @@ import lombok.Data;
 @Data
 public class IPResponse {
     @SerializedName("ip")
-    private String IP;
+    private String iP;
     private String region;
     @SerializedName("country_name")
     private String countryName;
