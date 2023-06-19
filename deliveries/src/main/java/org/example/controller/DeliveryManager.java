@@ -218,105 +218,65 @@ public void deDuplicateAssignments() {
     public ArrayList<DeliveryRoute> getOptimalPath(DeliveryAssignment assignment) {
 //Optimal!
 //        Route 1: ( 0, 0) ---> (50,50) | Cost: 190.00 Route 2: ( 0, 0) ---> (10,20) | Cost: 55.00 Route3:(9,0)--->(0,0)|Cost: 10.50 Route 4: (10,20) ---> (50,50) | Cost: 500
-
-        // Naive neighbours
-//        ArrayList<DeliveryRoute> startNeighbours =
-//                (ArrayList<DeliveryRoute>) rawRoutes
-//                        .stream()
-//                        .filter(r -> r.getStart().equals(assignment.getSource()))
-//                        .collect(Collectors.toList());
-//        Optional?
-//        Needs to be ordered
 //        TODO: Implement Dijkstras algorithm for path weighting
-
 //        TODO: Improve efficiency of list streams
-
-//        Create a map of every coordinate
-        // Copy routes to new set so you can remvoe
-        HashSet<Coordinate> unVisited = new HashSet<>();
-//        ArrayList<Coordinate> visited = new ArrayList<>();
-
 //        TODO: consider  size
-        HashMap<Coordinate, Double> nodes = new HashMap<>();
 
         DeliveryNetwork network = buildNetwork();
+//        HashMap<Coordinate, LinkedList<Coordinate>> nodesMap = network.getNodes();
+        HashMap<Coordinate, HashSet<Coordinate>> nodesMap = network.getNodes();
 
+        // Set of all coordinates
+//        HashSet<Coordinate> removableSet = new HashSet<>(network.getCosts().keySet());
 
-
-        for (DeliveryRoute route : routes) {
-            if (!nodes.containsKey(route.getStart())) {
-                nodes.put(route.getStart(), Double.MAX_VALUE);
-                unVisited.add(route.getStart());
-            }
-            // TODO: Make this a simpler addition, does it matter to overwrite?
-            if (!nodes.containsKey(route.getEnd())) {
-                nodes.put(route.getEnd(), Double.MAX_VALUE);
-                unVisited.add(route.getEnd());
-            }
-        }
-
-//        Start node
+        // Breadth first order from starting node
         Coordinate currentNode = assignment.getSource();
+        Coordinate target = assignment.getDestination();
+        System.out.println("Pre BFS");
+
+        network.breadthFirstList(currentNode);
+        System.out.println("Network is BFS ready");
 
         // Update start node to having zero distance
-        nodes.replace(currentNode, 0.0);
+        network.setCost(currentNode, 0.0);
 
+        LinkedHashSet<Coordinate> unVisited = network.getUnVisited();
+        Iterator<Coordinate> iter = unVisited.iterator();
 
-        // Get neighbour coords
-//        Map<Coordinate, Double> neighbourWeights = routes
-//                .stream()
-//                .filter(r -> r.getStart().equals(startNode))
-//                .collect(Collectors.toMap(
-//                        DeliveryRoute::getEnd,
-//                        r -> Double.min(r.getCost(), nodes.get(r.getEnd()))
-//                ));
+        HashMap<Coordinate, Double> costs = network.getCosts();
+        HashSet<Coordinate> neighbours;
+        Double routeCost;
 
+        // Do while destination not yet visited
+        // or while dest has shortest unvisited dist
+        while (unVisited.contains(target) && iter.hasNext()) {
+            routeCost = costs.get(currentNode);
+//            neighbours = nodesMap.get(currentNode);
+            neighbours = nodesMap.get(currentNode);
 
-        Map<Coordinate, Double> neighbourWeights = new HashMap<>();
+            // TODO: Not quite right because don't visit visited nodes
 
-//        Start loop here
-//        Do while destination not yet visited or while dest has shortest unvisited dist
-
-//        while (nodes.get(assignment.getDestination()).equals(Double.MAX_VALUE)) {
-        while (unVisited.contains(assignment.getDestination())) {
-
-
-            for (DeliveryRoute route : routes) {
-                if (route.getStart().equals(currentNode)) {
-                    System.out.printf("Matched starting node: %s", route.getStart());
-                    System.out.printf("New k-v will be: %s: %s", route.getEnd(), route.getCost());
-
-                    double existingWeight = nodes.get(route.getEnd());
-                    nodes.put(
-                            route.getEnd(),
-                            Double.min(
-                                    route.getCost() + nodes.get(currentNode),
-                                    existingWeight
-                            )
-                    );
-                    System.out.println("successful entry");
-
-
-
-
-                }
+            for (Coordinate node : neighbours) {
+                network.setCost(node, routeCost + costs.get(node));
             }
-
-            currentNode = // get next?
-//                    https://en.wikipedia.org/wiki/Dijkstra's_algorithm
-
+            unVisited.remove(currentNode);
+            currentNode = iter.next();
         }
 
-
-        // Update neighbours
-//        nodes.putAll(neighbourWeights);
-
-        System.out.println(nodes);
+        System.out.println(network);
 
 
         return null;
     }
 
+//    private void addNodeChildren(Coordinate parent) {
+//        for (Coordinate node : nodes.get(parent)) {
+//            unVisited.add(node);
+//            removableSet.remove(node);
+//        }
+//    }
+
+    // TODO: Either use bulider pattern or not
     public DeliveryNetwork buildNetwork() {
         DeliveryNetwork network = new DeliveryNetwork();
 

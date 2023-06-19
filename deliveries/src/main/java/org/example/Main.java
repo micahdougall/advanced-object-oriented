@@ -27,19 +27,25 @@ public class Main {
         loadAssignments(manager);
 
 //        TODO: Tidy up toString and colors
-        ArtifactPrinter.printReport(manager.getRoutes());
-        ArtifactPrinter.printReport(manager.getAssignments());
+//        ArtifactPrinter.printReport(manager.getRoutes());
+//        ArtifactPrinter.printReport(manager.getAssignments());
 
 //        HashSet assignments = manager.deDuplicateAssignments();
         manager.deDuplicateAssignments();
-        ArtifactPrinter.printReport(manager.getDistinctRoutes());
+//        ArtifactPrinter.printReport(manager.getDistinctRoutes());
 
 //        TODO: Use iterator for hashset
 
-        System.out.println("Comparing assignments");
+//        System.out.println("Comparing assignments");
 //        compareAssignments(controller);
 
 //        ArtifactPrinter.findRoutes(manager);
+
+        DeliveryRoute route = manager.findRoute(
+                new Coordinate(50, 95),
+                new Coordinate(62, 14)
+        ).get();
+        System.out.println(route);
 
         manager.getOptimalPath(manager.getAssignments().get(0));
 
@@ -80,6 +86,7 @@ public class Main {
 
     public static void testOptimalRoute() {
 //        print score for each
+
     }
 
     public static void testMapping() {
