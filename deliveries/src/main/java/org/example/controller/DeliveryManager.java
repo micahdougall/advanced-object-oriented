@@ -4,6 +4,7 @@ import org.example.entities.Coordinate;
 import org.example.entities.DeliveryAssignment;
 import org.example.entities.DeliveryRoute;
 import org.example.entities.Priority;
+import org.example.model.DeliveryNetwork;
 import org.example.response.RoutedDelivery;
 import org.example.util.ArtifactReader;
 
@@ -11,7 +12,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class DeliveryManager {
@@ -232,15 +232,26 @@ public void deDuplicateAssignments() {
 //        TODO: Improve efficiency of list streams
 
 //        Create a map of every coordinate
+        // Copy routes to new set so you can remvoe
+        HashSet<Coordinate> unVisited = new HashSet<>();
+//        ArrayList<Coordinate> visited = new ArrayList<>();
+
 //        TODO: consider  size
         HashMap<Coordinate, Double> nodes = new HashMap<>();
+
+        DeliveryNetwork network = buildNetwork();
+
+
 
         for (DeliveryRoute route : routes) {
             if (!nodes.containsKey(route.getStart())) {
                 nodes.put(route.getStart(), Double.MAX_VALUE);
+                unVisited.add(route.getStart());
             }
+            // TODO: Make this a simpler addition, does it matter to overwrite?
             if (!nodes.containsKey(route.getEnd())) {
                 nodes.put(route.getEnd(), Double.MAX_VALUE);
+                unVisited.add(route.getEnd());
             }
         }
 
@@ -249,6 +260,7 @@ public void deDuplicateAssignments() {
 
         // Update start node to having zero distance
         nodes.replace(currentNode, 0.0);
+
 
         // Get neighbour coords
 //        Map<Coordinate, Double> neighbourWeights = routes
@@ -265,7 +277,8 @@ public void deDuplicateAssignments() {
 //        Start loop here
 //        Do while destination not yet visited or while dest has shortest unvisited dist
 
-        while (nodes.get(assignment.getDestination()).equals(Double.MAX_VALUE)) {
+//        while (nodes.get(assignment.getDestination()).equals(Double.MAX_VALUE)) {
+        while (unVisited.contains(assignment.getDestination())) {
 
 
             for (DeliveryRoute route : routes) {
@@ -282,6 +295,10 @@ public void deDuplicateAssignments() {
                             )
                     );
                     System.out.println("successful entry");
+
+
+
+
                 }
             }
 
@@ -298,6 +315,15 @@ public void deDuplicateAssignments() {
 
 
         return null;
+    }
+
+    public DeliveryNetwork buildNetwork() {
+        DeliveryNetwork network = new DeliveryNetwork();
+
+        for (DeliveryRoute route : routes) {
+            network.addDeliveryRoute(route);
+        }
+        return network;
     }
 
     public HashMap<DeliveryAssignment, ArrayList<DeliveryRoute>> assignRoutes() {
