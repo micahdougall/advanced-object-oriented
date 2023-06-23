@@ -5,19 +5,12 @@ import lombok.Data;
 
 @Data @AllArgsConstructor
 public class DeliveryRoute {
-//    TODO: Should this be a data class?
 
     private String name;
     private Coordinate start;
     private Coordinate end;
-    private double cost; // Check suitability and performance;
+    private double cost;
 
-//    public DeliveryRoute(String name, Coordinate start, Coordinate end, double cost) {
-//        this.name = name;
-//        this.start = start;
-//        this.end = end;
-//        this.cost = cost;
-//    }
 
     @Override
     public String toString() {

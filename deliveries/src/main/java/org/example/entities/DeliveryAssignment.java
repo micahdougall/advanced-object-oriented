@@ -1,7 +1,5 @@
 package org.example.entities;
 
-import java.util.TreeMap;
-
 public class DeliveryAssignment {
 
     private String description;

@@ -1,8 +1,8 @@
 package org.example.util;
 
-import javafx.scene.layout.CornerRadii;
 import org.example.controller.DeliveryManager;
 import org.example.entities.Coordinate;
+import org.example.entities.Location;
 import org.example.entities.DeliveryRoute;
 
 import java.util.*;
@@ -27,6 +27,13 @@ public class ArtifactPrinter {
             System.out.printf("Route for coordinates: (%s -> %s) => %s\n", start, end, optional.get());
         } catch (NoSuchElementException e) {
             System.out.printf("Item not found for coordinates: (%s -> %s)\n", start, end);
+        }
+    }
+
+    public static void printOrderedCoordinates(Collection<Location> coordinates) {
+        System.out.println("Printing ordered coordinates...");
+        for (Location coordinate : coordinates) {
+            System.out.printf("\t->%s\n", coordinate);
         }
     }
 }

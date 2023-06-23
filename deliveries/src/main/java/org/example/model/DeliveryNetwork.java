@@ -1,122 +1,109 @@
 package org.example.model;
 
+import lombok.AccessLevel;
+import lombok.Setter;
 import org.example.entities.Coordinate;
+import org.example.entities.Location;
 import org.example.entities.DeliveryRoute;
 
-import lombok.AccessLevel;
 import lombok.Data;
-import lombok.Setter;
 
 import java.util.*;
 
-// TODO: Any benefit from Lombok here?
+
 @Data
 public class DeliveryNetwork {
-//    @Setter(AccessLevel.NONE)
-//    private HashMap<Coordinate, LinkedList<Coordinate>> nodes = new HashMap<>();
-    private HashMap<Coordinate, HashSet<Coordinate>> nodes = new HashMap<>();
-
     @Setter(AccessLevel.NONE)
-    private HashMap<Coordinate, Double> costs = new HashMap<>();
+//    private HashMap<Coordinate, HashSet<Coordinate>> nodes;
 
-    // Set of all coordinates
-//    = new HashSet<>(network.getCosts().keySet());
+    ArrayList<Location> nodes;
 
-    private LinkedHashSet<Coordinate> unVisited = new LinkedHashSet<>();
+    private LinkedList<Coordinate> visitSequence;
 
-//    private LinkedList<Coordinate> addNode(Coordinate node) {
-    private HashSet<Coordinate> addNode(Coordinate node) {
-        if (!nodes.containsKey(node)) {
-//            nodes.put(node, new LinkedList<>());
-            nodes.put(node, new HashSet<>());
-        }
-        return nodes.get(node);
-    }
-
-    public void addDeliveryRoute(DeliveryRoute route) {
-        Coordinate startNode = route.getStart();
-        Coordinate endNode = route.getEnd();
-//        System.out.printf("Adding new route with %s, %s\n", startNode, endNode);
-
-        // Join nodes in LinkedList whilst adding to HashMap
-//        LinkedList<Coordinate> startAdjacents = addNode(startNode);
-        HashSet<Coordinate> startAdjacents = addNode(startNode);
-//        System.out.println(startAdjacents);
-//        System.exit(0);
-        startAdjacents.add(endNode);
-
-//        LinkedList<Coordinate> endAdjacents = addNode(endNode);
-        HashSet<Coordinate> endAdjacents = addNode(endNode);
-        endAdjacents.add(startNode);
-
-        setCost(startNode, Double.MAX_VALUE);
-        setCost(endNode, Double.MAX_VALUE);
-
-//        System.out.printf("Nodes created for %s and %s\n", startNode, endNode);
-    }
-
-    public void breadthFirstList(Coordinate currentNode) {
-        HashSet<Coordinate> remaining = new HashSet<>(nodes.keySet());
-
-        unVisited.add(currentNode);
-        remaining.remove(currentNode);
-
-        System.out.printf("Starting at node: %s\n", currentNode);
-
-        HashSet<Coordinate> children = nodes.get(currentNode);
-        Iterator<Coordinate> iter = children.iterator();
-
-        while (!remaining.isEmpty()) {
-//            LinkedList<Coordinate> children = nodes.get(currentNode);
-            printRemaining(currentNode, children, remaining);
+    private HashSet<DeliveryRoute> routes;
 
 
-            for (Coordinate node : children) {
-                unVisited.add(node);
-                remaining.remove(node);
+    public DeliveryNetwork(HashSet<DeliveryRoute> deliveryRoutes) {
+        this.routes = deliveryRoutes;
+        nodes = new ArrayList<>();
+        visitSequence = new LinkedList<>();
+
+        for (DeliveryRoute route : routes) {
+            Coordinate startNode = route.getStart();
+            Coordinate endNode = route.getEnd();
+
+            if (!nodes.contains(startNode)) {
+                nodes.add(new Location(startNode));
             }
-            printRemaining(currentNode, children, remaining);
+            getNode(startNode).addChild(route.getEnd());
 
-            Coordinate childNode;
-            while (iter.hasNext()) {
-                childNode = iter.next();
-                children = nodes.get(childNode);
-                for (Coordinate node : children) {
-                    unVisited.add(node);
-                    remaining.remove(node);
+            if (!nodes.contains(endNode)) {
+                nodes.add(new Location(endNode));
+            }
+        }
+    }
+
+
+    public LinkedList<Coordinate> breadthFirstQueue(Coordinate startNode) {
+        Queue<Coordinate> queue = new LinkedList<>();
+
+        queue.add(startNode);
+        visitSequence.add(startNode);
+
+        while (!queue.isEmpty()) {
+            Coordinate next = queue.poll();
+            System.out.println("Coordinate = " + next);
+            HashSet<Coordinate> children = getNode(next).getChildren();
+
+            System.out.println("Children = " + children);
+            if (children != null) {
+                for (Coordinate child : children) {
+                    if (!visitSequence.contains(child)) {
+                        visitSequence.add(child);
+                        queue.add(child);
+                    }
                 }
-                printRemaining(childNode, children, remaining);
             }
-            if (currentNode.getX() == 52) System.exit(0);
-//            System.exit(0);
         }
+        return visitSequence;
     }
 
-    public void printRemaining(
-            Coordinate current,
-            HashSet<Coordinate> children,
-            HashSet<Coordinate> left
-    ) {
-        System.out.printf(
-                "\nCurrent node is (%s, %s) with %s children and %s remaining nodes\n",
-                current.getX(), current.getY(), children.size(), left.size());
-//        for (Coordinate n : left) {
-//            System.out.printf("  ->  (%s, %s)\n", n.getX(), n.getY());
+
+
+//    public void setCost(Coordinate location, Double cost) {
+//        if (location.getCost() == null || cost < location.getCost()) {
+//            System.out.println("Updating cost to " + cost);
+//
+//            location.setCost(cost);
+//            location.setParent();
 //        }
-        System.out.println(children);
-        left.stream()
-            .sorted()
-            .forEach(n ->
-                System.out.printf(
-                    "  ->  (%s, %s)\n",
-                    n.getX(), n.getY())
-            );
+//    }
+
+    public void updateCost(Coordinate point, Double cost, Coordinate parent) {
+        Location location = getNode(point);
+        if (location.getCost() == null || cost < location.getCost()) {
+
+            location.setCost(cost);
+            location.setParent(parent);
+        }
     }
 
-    public void setCost(Coordinate location, Double cost) {
-        if (costs.get(location) == null || cost < costs.get(location)) {
-            costs.replace(location, cost);
+    public void printNetwork() {
+        for (Location node : nodes) {
+            System.out.println(node);
+            for (Coordinate child : node.getChildren()) {
+                System.out.printf("\t -> %s\n", child);
+            }
         }
+    }
+
+    public Location getNode(Coordinate coordinate) {
+        for (Location node : nodes) {
+            if (node.getPoint().equals(coordinate)) {
+                return node;
+            }
+        }
+        return null;
     }
 }
 
