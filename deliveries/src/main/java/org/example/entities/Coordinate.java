@@ -3,13 +3,12 @@ package org.example.entities;
 
 import lombok.*;
 
-@EqualsAndHashCode @AllArgsConstructor
+//@EqualsAndHashCode @AllArgsConstructor
+@AllArgsConstructor
 @Data public class Coordinate {
 
-    @NonNull
     private int x;
 
-    @NonNull
     private int  y;
 
     public boolean equals(Object o) {

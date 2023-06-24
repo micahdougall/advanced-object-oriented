@@ -9,20 +9,77 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
 
-import static java.lang.System.exit;
-
 
 public class DeliveryManager {
 
     private HashSet<DeliveryRoute> routes;
     private HashSet<DeliveryAssignment> assignments;
 
+    public HashMap<DeliveryAssignment, Stack<Location>> getAssignmentPaths(
+            HashSet<DeliveryAssignment> assignments) {
 
-    public HashSet<DeliveryAssignment> getAssignments() {
-        return assignments;
-    }
-    public HashSet<DeliveryRoute> getRoutes() {
+        HashMap<DeliveryAssignment, Stack<Location>> routes = new HashMap<>();
+        for (DeliveryAssignment assignment : assignments) {
+            routes.put(assignment, getOptimalPath(assignment));
+        }
         return routes;
+    }
+
+    // TODO: Cost of list vs Stack
+    public Stack<Location> getOptimalPath(DeliveryAssignment assignment) {
+
+//        System.out.println("Getting optimal path for assignment: " + assignment);
+
+        DeliveryNetwork network = new DeliveryNetwork(routes);
+
+//        System.out.println("Network built...");
+//        network.printNetwork();
+
+
+        // Breadth first order from starting node
+        Coordinate currentNode = assignment.getSource();
+        LinkedList<Coordinate> queue = network.breadthFirstQueue(currentNode);
+//        System.out.println("Queue is.. " + queue);
+
+        // Update start node to having zero distance
+        network.updateCost(currentNode, 0.0, null);
+
+        HashSet<Coordinate> neighbours;
+
+//        Location currentLocation = network.getNode(currentNode);
+        Location currentLocation;
+        while (!queue.isEmpty()) {
+            currentNode = queue.poll();
+            currentLocation = network.getNode(currentNode);
+
+            double currentNodeCost = currentLocation.getCost();
+
+            neighbours = currentLocation.getChildren();
+
+            if (neighbours != null) {
+                for (Coordinate node : neighbours) {
+                    double routeCost = findRoute(currentNode, node).get().getCost();
+                    network.updateCost(node, currentNodeCost + routeCost, currentNode);
+                }
+            }
+        }
+
+//        network.printNetwork();
+
+        Stack<Location> path = new Stack<>();
+//        Queue<Location> path = new LinkedList<>();
+
+        Location targetLocation = network.getNode(assignment.getDestination());
+        Location startLocation = network.getNode(assignment.getSource());
+
+        while (!path.contains(startLocation)) {
+            path.push(targetLocation);
+            targetLocation = network.getNode(targetLocation.getParent());
+        }
+
+//        return null;
+        Collections.reverse(path);
+        return path;
     }
 
     public void parseRoutes(String filePath) throws IOException {
@@ -33,6 +90,9 @@ public class DeliveryManager {
 
         while (in.hasNextLine()) {
             String[] line = in.nextLine().split(",");
+
+//            double cost = Double.parseDouble(line[3]);
+
 
             DeliveryRoute newRoute = new DeliveryRoute(
                     line[2],
@@ -46,6 +106,8 @@ public class DeliveryManager {
                     ),
                     Double.parseDouble(line[3])
             );
+
+//            if (routes.contains(newRoute) && r)
             routes.add(newRoute);
         }
         in.close();
@@ -81,73 +143,12 @@ public class DeliveryManager {
                 .findFirst();
     }
 
-    public ArrayList<DeliveryRoute> getOptimalPath(DeliveryAssignment assignment) {
-        System.out.println("Getting optimal path for assignment: " + assignment);
 
-        DeliveryNetwork network = new DeliveryNetwork(routes);
-        network.printNetwork();
-//        exit(0);
-
-
-        // Breadth first order from starting node
-        Coordinate currentNode = assignment.getSource();
-        LinkedList<Coordinate> queue = network.breadthFirstQueue(currentNode);
-        System.out.println("Queue is.. " + queue);
-//        exit(0);
-//        Iterator<Coordinate> queue = coords.iterator();
-
-        // Update start node to having zero distance
-
-        network.updateCost(currentNode, 0.0, null);
-
-        HashSet<Coordinate> neighbours;
-
-        Location currentLocation = network.getNode(currentNode);
-        while (!queue.isEmpty()) {
-            currentNode = queue.poll();
-            System.out.println("Starting for " + currentNode);
-            currentLocation = network.getNode(currentNode);
-
-            double currentNodeCost = currentLocation.getCost();
-
-            neighbours = currentLocation.getChildren();
-
-            System.out.println(neighbours);
-
-            if (neighbours != null) {
-                for (Coordinate node : neighbours) {
-                    double routeCost = findRoute(currentNode, node).get().getCost();
-//                    System.out.println("Node cost is currently " + node.getCost());
-//                    System.out.println("New cost will be " + (currentNodeCost + routeCost));
-//                    node.setCost(currentNodeCost + routeCost);
-
-                    network.updateCost(node, currentNodeCost + routeCost, currentNode);
-
-                }
-            } else {
-                System.out.println("No neighbours for " + currentNode);
-            }
-        }
-
-        network.printNetwork();
-//        exit(0);
-
-        Stack<Location> path = new Stack<>();
-
-//        Coordinate targetNode = assignment.getDestination();
-//        Coordinate startNode = assignment.getSource();
-
-        Location targetLocation = network.getNode(assignment.getDestination());
-        Location startLocation = network.getNode(assignment.getSource());
-
-        while (!path.contains(startLocation)) {
-            path.push(targetLocation);
-            targetLocation = network.getNode(targetLocation.getParent());
-        }
-        System.out.println("Path is " + path);
-
-        return null;
+    public HashSet<DeliveryAssignment> getAssignments() {
+        return assignments;
     }
 
-
+    public HashSet<DeliveryRoute> getRoutes() {
+        return routes;
+    }
 }

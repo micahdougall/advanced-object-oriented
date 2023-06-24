@@ -14,9 +14,7 @@ import java.util.*;
 @Data
 public class DeliveryNetwork {
     @Setter(AccessLevel.NONE)
-//    private HashMap<Coordinate, HashSet<Coordinate>> nodes;
-
-    ArrayList<Location> nodes;
+    private ArrayList<Location> nodes;
 
     private LinkedList<Coordinate> visitSequence;
 
@@ -29,16 +27,17 @@ public class DeliveryNetwork {
         visitSequence = new LinkedList<>();
 
         for (DeliveryRoute route : routes) {
-            Coordinate startNode = route.getStart();
-            Coordinate endNode = route.getEnd();
+            Location startNode = new Location(route.getStart());
+            Location endNode = new Location(route.getEnd());
 
             if (!nodes.contains(startNode)) {
-                nodes.add(new Location(startNode));
+                nodes.add(startNode);
             }
-            getNode(startNode).addChild(route.getEnd());
+            getNode(route.getStart()).addChild(route.getEnd());
+
 
             if (!nodes.contains(endNode)) {
-                nodes.add(new Location(endNode));
+                nodes.add(endNode);
             }
         }
     }
@@ -52,10 +51,10 @@ public class DeliveryNetwork {
 
         while (!queue.isEmpty()) {
             Coordinate next = queue.poll();
-            System.out.println("Coordinate = " + next);
+//            System.out.println("Coordinate = " + next);
             HashSet<Coordinate> children = getNode(next).getChildren();
 
-            System.out.println("Children = " + children);
+//            System.out.println("Children = " + children);
             if (children != null) {
                 for (Coordinate child : children) {
                     if (!visitSequence.contains(child)) {
@@ -68,16 +67,14 @@ public class DeliveryNetwork {
         return visitSequence;
     }
 
-
-
-//    public void setCost(Coordinate location, Double cost) {
-//        if (location.getCost() == null || cost < location.getCost()) {
-//            System.out.println("Updating cost to " + cost);
-//
-//            location.setCost(cost);
-//            location.setParent();
-//        }
-//    }
+    public Location getNode(Coordinate coordinate) {
+        for (Location node : nodes) {
+            if (node.getPoint().equals(coordinate)) {
+                return node;
+            }
+        }
+        return null;
+    }
 
     public void updateCost(Coordinate point, Double cost, Coordinate parent) {
         Location location = getNode(point);
@@ -95,15 +92,6 @@ public class DeliveryNetwork {
                 System.out.printf("\t -> %s\n", child);
             }
         }
-    }
-
-    public Location getNode(Coordinate coordinate) {
-        for (Location node : nodes) {
-            if (node.getPoint().equals(coordinate)) {
-                return node;
-            }
-        }
-        return null;
     }
 }
 

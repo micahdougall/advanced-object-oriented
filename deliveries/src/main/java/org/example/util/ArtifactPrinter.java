@@ -9,6 +9,7 @@ import java.util.*;
 
 public class ArtifactPrinter {
 
+    // TODO: Restrict print count
     public static <E> void printReport(Collection<E> artifacts) {
         System.out.printf("Printing report for %d artifacts...\n", artifacts.size());
 
@@ -34,6 +35,15 @@ public class ArtifactPrinter {
         System.out.println("Printing ordered coordinates...");
         for (Location coordinate : coordinates) {
             System.out.printf("\t->%s\n", coordinate);
+        }
+    }
+
+    public static void printDeliveryPath(Stack<Location> path, Coordinate start, Coordinate end) {
+        System.out.printf(
+                "Printing optimal path from %s to %s (total cost=%.2f)\n",
+                start, end, path.peek().getCost());
+        for (Location location : path) {
+            System.out.printf("\t ->%s\n", location.getPoint());
         }
     }
 }

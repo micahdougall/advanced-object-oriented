@@ -103,10 +103,9 @@ public class DeliveryAssignment {
 //                ", destination=" + destination +
 //                '}';
         return String.format(
-            "(%d, %d) -> (%d, %d) [%s] - %s",
+            "(%d, %d) -> (%d, %d) - %s",
             source.getX(), source.getY(),
-            destination.getX(), destination.getY(),
-            this.hashCode(), description
+            destination.getX(), destination.getY(), description
         );
     }
 }
