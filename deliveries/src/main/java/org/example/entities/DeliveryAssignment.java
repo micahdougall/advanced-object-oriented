@@ -1,6 +1,7 @@
 package org.example.entities;
 
-public class DeliveryAssignment {
+// TODO: Lombok
+public class DeliveryAssignment implements Comparable<DeliveryAssignment> {
 
     private String description;
     private Priority priority;
@@ -107,5 +108,10 @@ public class DeliveryAssignment {
             source.getX(), source.getY(),
             destination.getX(), destination.getY(), description
         );
+    }
+
+    @Override
+    public int compareTo(DeliveryAssignment other) {
+        return this.priority.compareTo(other.getPriority());
     }
 }

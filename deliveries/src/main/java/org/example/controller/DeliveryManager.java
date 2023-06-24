@@ -2,31 +2,77 @@ package org.example.controller;
 
 import org.example.entities.*;
 import org.example.model.DeliveryNetwork;
-import org.example.util.ArtifactReader;
+import org.example.response.RoutedDelivery;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 public class DeliveryManager {
 
-    private HashSet<DeliveryRoute> routes;
+    // TODO: Either these are used or not
+    private ArrayList<DeliveryRoute> routes;
     private HashSet<DeliveryAssignment> assignments;
+
+    // TODO: Accetp routes as arg for funcitonal
+    public Stream<RoutedDelivery> batchDeliveryRoutes(
+            HashSet<DeliveryAssignment> assignments) {
+
+        return getAssignmentPaths(assignments)
+                .entrySet().stream()
+                .map(e -> new RoutedDelivery(
+                        e.getKey(),
+                        e.getValue(),
+                        e.getValue().peek().getCost()))
+                .sorted();
+    }
 
     public HashMap<DeliveryAssignment, Stack<Location>> getAssignmentPaths(
             HashSet<DeliveryAssignment> assignments) {
 
         HashMap<DeliveryAssignment, Stack<Location>> routes = new HashMap<>();
         for (DeliveryAssignment assignment : assignments) {
-            routes.put(assignment, getOptimalPath(assignment));
+            Optional<Stack<Location>> route = getOptimalPath(assignment);
+            if (route.isPresent()) {
+                routes.put(assignment, route.get());
+            }
+        }
+        return routes;
+    }
+
+    // TODO: Check concurrency risks
+    public HashMap<DeliveryAssignment, Stack<Location>> getAssignmentPathsParallel(
+            HashSet<DeliveryAssignment> assignments) throws InterruptedException, ExecutionException {
+
+        HashMap<DeliveryAssignment, Stack<Location>> routes = new HashMap<>();
+
+        // Parallel processing
+        ExecutorService service = Executors.newFixedThreadPool(6);
+        HashMap<DeliveryAssignment, Future<Optional<Stack<Location>>>> futures = new HashMap<>();
+        for (DeliveryAssignment assignment : assignments) {
+            futures.put(assignment, service.submit(() ->  getOptimalPath(assignment)));
+        };
+        service.shutdown();
+        while (!service.awaitTermination(500, TimeUnit.MILLISECONDS));
+
+        // Get futures as map
+        for (Map.Entry<DeliveryAssignment, Future<Optional<Stack<Location>>>> future : futures.entrySet()) {
+            Optional<Stack<Location>> path = future.getValue().get();
+            if (path.isPresent()) {
+                routes.put(future.getKey(), path.get());
+            }
         }
         return routes;
     }
 
     // TODO: Cost of list vs Stack
-    public Stack<Location> getOptimalPath(DeliveryAssignment assignment) {
+    // TODO: This should take coordinates, not assignment? And return an Optional
+    public Optional<Stack<Location>> getOptimalPath(DeliveryAssignment assignment) {
 
 //        System.out.println("Getting optimal path for assignment: " + assignment);
 
@@ -72,43 +118,69 @@ public class DeliveryManager {
         Location targetLocation = network.getNode(assignment.getDestination());
         Location startLocation = network.getNode(assignment.getSource());
 
-        while (!path.contains(startLocation)) {
+        while (!path.contains(startLocation) && targetLocation != null) {
+//        while (!path.contains(startLocation)) {
             path.push(targetLocation);
             targetLocation = network.getNode(targetLocation.getParent());
-        }
 
-//        return null;
+//            try {
+//                targetLocation = network.getNode(targetLocation.getParent());
+//            } catch (Exception e) {
+//                System.out.println("attempted assignment: " + assignment);
+//                System.out.println("No route found for target...??");
+//                System.out.println(targetLocation);
+//                System.out.println("Path so far: " + path);
+//                throw e;
+//            }
+        }
+        if (!path.contains(startLocation)) {
+            return Optional.empty();
+        }
         Collections.reverse(path);
-        return path;
+        return Optional.of(path);
     }
 
     public void parseRoutes(String filePath) throws IOException {
-        int lines = ArtifactReader.lineCount(filePath);
-        routes = new HashSet<>(lines, 1);
+        // TODO: Can you optimise size?
+//        int lines = ArtifactReader.lineCount(filePath);
+//        routes = new ArrayList<>(lines, 1);
+        routes = new ArrayList<>();
 
         Scanner in = new Scanner(new File(filePath));
 
         while (in.hasNextLine()) {
             String[] line = in.nextLine().split(",");
 
-//            double cost = Double.parseDouble(line[3]);
-
-
-            DeliveryRoute newRoute = new DeliveryRoute(
-                    line[2],
-                    new Coordinate(
-                            Integer.parseInt(line[0]),
-                            Integer.parseInt(line[1])
-                    ),
-                    new Coordinate(
-                            Integer.parseInt(line[4]),
-                            Integer.parseInt(line[5])
-                    ),
-                    Double.parseDouble(line[3])
+            String routeName = line[2];
+            double cost = Double.parseDouble(line[3]);
+            Coordinate start = new Coordinate(
+                    Integer.parseInt(line[0]),
+                    Integer.parseInt(line[1])
+            );
+            Coordinate end = new Coordinate(
+                    Integer.parseInt(line[4]),
+                    Integer.parseInt(line[5])
             );
 
-//            if (routes.contains(newRoute) && r)
-            routes.add(newRoute);
+            // Optimise for routes with a lower cost
+            Optional<DeliveryRoute> existing = findRoute(start, end);
+            if (existing.isPresent()) {
+                DeliveryRoute oldRoute = existing.get();
+                if (oldRoute.getCost() <= cost) {
+                    System.out.printf(
+                            "Discarding %s (cost=%.2f) in favour of existing %s (cost=%.2f)\n",
+                            routeName, cost, oldRoute.getName(), oldRoute.getCost()
+                    );
+                    continue;
+                } else {
+                    System.out.printf(
+                            "Removing %s (cost=%.2f) in favour of new %s (cost=%.2f)\n",
+                            oldRoute.getName(), oldRoute.getCost(), routeName, cost
+                            );
+                    routes.remove(oldRoute);
+                }
+            };
+            routes.add(new DeliveryRoute(routeName, start, end, cost));
         }
         in.close();
     }
@@ -148,7 +220,7 @@ public class DeliveryManager {
         return assignments;
     }
 
-    public HashSet<DeliveryRoute> getRoutes() {
+    public ArrayList<DeliveryRoute> getRoutes() {
         return routes;
     }
 }

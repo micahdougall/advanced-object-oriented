@@ -18,10 +18,10 @@ public class DeliveryNetwork {
 
     private LinkedList<Coordinate> visitSequence;
 
-    private HashSet<DeliveryRoute> routes;
+    private ArrayList<DeliveryRoute> routes;
 
 
-    public DeliveryNetwork(HashSet<DeliveryRoute> deliveryRoutes) {
+    public DeliveryNetwork(ArrayList<DeliveryRoute> deliveryRoutes) {
         this.routes = deliveryRoutes;
         nodes = new ArrayList<>();
         visitSequence = new LinkedList<>();
