@@ -1,5 +1,7 @@
 package org.example.controller;
 
+import org.example.Colors;
+import org.example.Main;
 import org.example.entities.*;
 import org.example.model.DeliveryNetwork;
 import org.example.response.RoutedDelivery;
@@ -18,6 +20,7 @@ public class DeliveryManager {
     // TODO: Either these are used or not
     private ArrayList<DeliveryRoute> routes;
     private HashSet<DeliveryAssignment> assignments;
+
 
     // TODO: Accetp routes as arg for funcitonal
     public Stream<RoutedDelivery> batchDeliveryRoutes(
@@ -38,9 +41,7 @@ public class DeliveryManager {
         HashMap<DeliveryAssignment, Stack<Location>> routes = new HashMap<>();
         for (DeliveryAssignment assignment : assignments) {
             Optional<Stack<Location>> route = getOptimalPath(assignment);
-            if (route.isPresent()) {
-                routes.put(assignment, route.get());
-            }
+            route.ifPresent(locations -> routes.put(assignment, locations));
         }
         return routes;
     }
@@ -63,9 +64,7 @@ public class DeliveryManager {
         // Get futures as map
         for (Map.Entry<DeliveryAssignment, Future<Optional<Stack<Location>>>> future : futures.entrySet()) {
             Optional<Stack<Location>> path = future.getValue().get();
-            if (path.isPresent()) {
-                routes.put(future.getKey(), path.get());
-            }
+            path.ifPresent(locations -> routes.put(future.getKey(), locations));
         }
         return routes;
     }
@@ -74,25 +73,17 @@ public class DeliveryManager {
     // TODO: This should take coordinates, not assignment? And return an Optional
     public Optional<Stack<Location>> getOptimalPath(DeliveryAssignment assignment) {
 
-//        System.out.println("Getting optimal path for assignment: " + assignment);
-
         DeliveryNetwork network = new DeliveryNetwork(routes);
-
-//        System.out.println("Network built...");
-//        network.printNetwork();
-
 
         // Breadth first order from starting node
         Coordinate currentNode = assignment.getSource();
         LinkedList<Coordinate> queue = network.breadthFirstQueue(currentNode);
-//        System.out.println("Queue is.. " + queue);
 
         // Update start node to having zero distance
         network.updateCost(currentNode, 0.0, null);
 
         HashSet<Coordinate> neighbours;
 
-//        Location currentLocation = network.getNode(currentNode);
         Location currentLocation;
         while (!queue.isEmpty()) {
             currentNode = queue.poll();
@@ -110,28 +101,14 @@ public class DeliveryManager {
             }
         }
 
-//        network.printNetwork();
-
         Stack<Location> path = new Stack<>();
-//        Queue<Location> path = new LinkedList<>();
 
         Location targetLocation = network.getNode(assignment.getDestination());
         Location startLocation = network.getNode(assignment.getSource());
 
         while (!path.contains(startLocation) && targetLocation != null) {
-//        while (!path.contains(startLocation)) {
             path.push(targetLocation);
             targetLocation = network.getNode(targetLocation.getParent());
-
-//            try {
-//                targetLocation = network.getNode(targetLocation.getParent());
-//            } catch (Exception e) {
-//                System.out.println("attempted assignment: " + assignment);
-//                System.out.println("No route found for target...??");
-//                System.out.println(targetLocation);
-//                System.out.println("Path so far: " + path);
-//                throw e;
-//            }
         }
         if (!path.contains(startLocation)) {
             return Optional.empty();
@@ -145,8 +122,9 @@ public class DeliveryManager {
 //        int lines = ArtifactReader.lineCount(filePath);
 //        routes = new ArrayList<>(lines, 1);
         routes = new ArrayList<>();
-
         Scanner in = new Scanner(new File(filePath));
+        int discards = 0;
+        int replacements = 0;
 
         while (in.hasNextLine()) {
             String[] line = in.nextLine().split(",");
@@ -162,27 +140,43 @@ public class DeliveryManager {
                     Integer.parseInt(line[5])
             );
 
+
             // Optimise for routes with a lower cost
             Optional<DeliveryRoute> existing = findRoute(start, end);
             if (existing.isPresent()) {
                 DeliveryRoute oldRoute = existing.get();
                 if (oldRoute.getCost() <= cost) {
-                    System.out.printf(
-                            "Discarding %s (cost=%.2f) in favour of existing %s (cost=%.2f)\n",
-                            routeName, cost, oldRoute.getName(), oldRoute.getCost()
-                    );
+                    if (Main.debug) {
+                        System.out.printf(
+                                "Discarding %s (cost=%.2f) in favour of existing %s (cost=%.2f)\n",
+                                routeName, cost, oldRoute.getName(), oldRoute.getCost());
+                    }
+                    discards++;
                     continue;
                 } else {
-                    System.out.printf(
-                            "Removing %s (cost=%.2f) in favour of new %s (cost=%.2f)\n",
-                            oldRoute.getName(), oldRoute.getCost(), routeName, cost
-                            );
+                    if (Main.debug) {
+                        System.out.printf(
+                                "Removing %s (cost=%.2f) in favour of new %s (cost=%.2f)\n",
+                                oldRoute.getName(), oldRoute.getCost(), routeName, cost
+                        );
+                    }
+                    replacements++;
                     routes.remove(oldRoute);
                 }
             };
             routes.add(new DeliveryRoute(routeName, start, end, cost));
         }
+        if (discards + replacements > 0) {
+            System.out.printf(
+                    Colors.ANSI_BOLD_WHITE + "\n\nDuplicates routes found!\n" +
+                    Colors.ANSI_COLOR_CYAN_BOLD +
+                            "Discarded %d routes and replaced %d in favour of lower costs routes.\n\n" +
+                            Colors.ANSI_COLOR_RESET,
+                    discards, replacements
+            );
+        }
         in.close();
+
     }
 
     public void parseAssignments(File inFile) throws FileNotFoundException {

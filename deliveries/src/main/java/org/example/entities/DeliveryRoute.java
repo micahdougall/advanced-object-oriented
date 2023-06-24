@@ -3,6 +3,9 @@ package org.example.entities;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NonNull;
+import org.example.Colors;
+
+import java.text.DecimalFormat;
 
 @Data @AllArgsConstructor
 public class DeliveryRoute {
@@ -32,11 +35,17 @@ public class DeliveryRoute {
 
     @Override
     public String toString() {
-        return "DeliveryRoute{" +
-                "name='" + name + '\'' +
-                ", start=" + start +
-                ", end=" + end +
-                ", cost=" + cost +
-                '}';
+        DecimalFormat formatter = new DecimalFormat("###,###.00");
+        String currency = String.format("£%S", formatter.format(cost));
+        return String.format(
+                Colors.ANSI_COLOR_PURPLE + "\t ➫ " +
+                Colors.ANSI_BOLD_WHITE + "%-12s " +
+                Colors.ANSI_COLOR_RESET + "%14s" +
+                Colors.ANSI_COLOR_GRAY + "⤑" +
+                Colors.ANSI_COLOR_RESET + "%-14s" +
+                Colors.ANSI_COLOR_YELLOW + "%15s" +
+                Colors.ANSI_COLOR_RESET,
+                name, start, end, currency
+        );
     }
 }

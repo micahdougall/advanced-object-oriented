@@ -12,12 +12,15 @@ public class Args {
     @Parameter
     private List<String> parameters = new ArrayList<>();
 
-    @Parameter(names={"--debug", "-d"})
-    private boolean debug = false;
-
     @Parameter(names={"--assignments", "-a"}, echoInput=true, validateWith=FileExists.class)
     String assignments;
 
     @Parameter(names={"--routes", "-r"}, echoInput=true, validateWith=FileExists.class)
     String routes;
+
+    @Parameter(names={"--print", "-p"}, echoInput=true)
+    int print = 20;
+
+    @Parameter(names={"--debug", "-d"})
+    boolean debug = false;
 }

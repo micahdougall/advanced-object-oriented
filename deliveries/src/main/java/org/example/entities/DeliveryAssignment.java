@@ -1,5 +1,7 @@
 package org.example.entities;
 
+import org.example.Colors;
+
 // TODO: Lombok
 public class DeliveryAssignment implements Comparable<DeliveryAssignment> {
 
@@ -96,6 +98,11 @@ public class DeliveryAssignment implements Comparable<DeliveryAssignment> {
     }
 
     @Override
+    public int compareTo(DeliveryAssignment other) {
+        return this.priority.compareTo(other.getPriority());
+    }
+
+    @Override
     public String toString() {
 //        return "DeliveryAssignment{" +
 //                "description='" + description + '\'' +
@@ -103,15 +110,26 @@ public class DeliveryAssignment implements Comparable<DeliveryAssignment> {
 //                ", source=" + source +
 //                ", destination=" + destination +
 //                '}';
+        String flag = "";
+        switch (priority) {
+            case LOW:
+                flag = String.format(Colors.ANSI_COLOR_GREEN + "%-6s" + Colors.ANSI_COLOR_RESET, priority );
+                break;
+            case MEDIUM:
+                flag = String.format(Colors.ANSI_COLOR_YELLOW + "%-6s" + Colors.ANSI_COLOR_RESET, priority );
+                break;
+            case HIGH:
+                flag = String.format(Colors.ANSI_COLOR_RED + "%-6s" + Colors.ANSI_COLOR_RESET, priority );
+                break;
+        }
         return String.format(
-            "(%d, %d) -> (%d, %d) - %s",
-            source.getX(), source.getY(),
-            destination.getX(), destination.getY(), description
+                Colors.ANSI_COLOR_PURPLE + "\t ➫ %s " +
+                        Colors.ANSI_COLOR_RESET + "%14s" +
+                        Colors.ANSI_COLOR_GRAY + "⤑" +
+                        Colors.ANSI_COLOR_RESET + "%-14s" +
+                        Colors.ANSI_BOLD_WHITE + "%s" +
+                        Colors.ANSI_COLOR_RESET,
+                flag, source, destination, description
         );
-    }
-
-    @Override
-    public int compareTo(DeliveryAssignment other) {
-        return this.priority.compareTo(other.getPriority());
     }
 }

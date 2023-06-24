@@ -1,7 +1,6 @@
 package org.example;
 
 import com.beust.jcommander.JCommander;
-import jdk.nashorn.internal.ir.Assignment;
 import org.example.controller.DeliveryManager;
 import org.example.entities.DeliveryAssignment;
 import org.example.entities.Location;
@@ -14,33 +13,28 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.stream.Stream;
 
-import static java.lang.System.exit;
 
+// TODO: SIGINT error for large file
 public class Main {
+
+    // Shortcut, just to save creating a Logger class, etc.
+    public static boolean debug;
+
     public static void main(String[] argv) {
 
         Args args = new Args();
         JCommander.newBuilder().addObject(args).build().parse(argv);
-//        exit(0);
-
-
-//    }
-//
-//    public static void run(Args args) {
+        debug = args.debug;
 
         DeliveryManager manager = new DeliveryManager();
-
 
         loadRoutes(manager, args.routes);
         loadAssignments(manager, args.assignments);
 
         // Print loaded data
-        ArtifactPrinter.printReport(manager.getRoutes());
-        ArtifactPrinter.printReport(manager.getAssignments());
-
-        // TODO: Show de-duping proof
+        ArtifactPrinter.printReport(manager.getRoutes(), args.print);
+        ArtifactPrinter.printReport(manager.getAssignments(), args.print);
 
         // Search for routes
         ArtifactPrinter.findRoutes(manager);
@@ -49,11 +43,11 @@ public class Main {
         routeDeliveryAssignment(manager);
 
         // Test all paths
-        routeAllDeliveryAssignmentsSlow(manager);
-        routeAllDeliveryAssignments(manager);
+        routeAllDeliveryAssignmentsSlow(manager, args.print);
+        routeAllDeliveryAssignments(manager, args.print);
 
         // Streamed Routed Deliveries
-        streamRoutedDeliveries(manager);
+        streamRoutedDeliveries(manager, args.print);
     }
 
 
@@ -61,8 +55,6 @@ public class Main {
         String routeFile = String.format("src/main/resources/%s", routes);
         try {
             manager.parseRoutes(routeFile);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -77,6 +69,7 @@ public class Main {
         }
     }
 
+    // TODO: Should be random route?
     public static void routeDeliveryAssignment(DeliveryManager manager) {
         DeliveryAssignment assignment = manager
                 .getAssignments()
@@ -86,57 +79,62 @@ public class Main {
 
         Optional<Stack<Location>> path = manager.getOptimalPath(assignment);
         if (path.isPresent()) {
+            System.out.println(
+                    Colors.ANSI_COLOR_GREEN_BOLD + "Printing optimal path for random assignment..." +
+                            Colors.ANSI_COLOR_RESET
+            );
             ArtifactPrinter.printDeliveryPath(
                     path.get(), assignment.getSource(), assignment.getDestination());
         } else {
-            System.out.println("No route available for assignment: " + assignment);
+            System.out.println(
+                    Colors.ANSI_COLOR_RED +
+                            "No route available for assignment: " +
+                            Colors.ANSI_COLOR_RESET + assignment);
         }
     }
 
-    public static void routeAllDeliveryAssignmentsSlow(DeliveryManager manager) {
+    public static void routeAllDeliveryAssignmentsSlow(DeliveryManager manager, int maxRecords) {
+        System.out.println(
+                Colors.ANSI_COLOR_GREEN_BOLD + "\n\nPrinting optimal paths without threading..." +
+                        Colors.ANSI_COLOR_RESET
+        );
         Instant start = Instant.now();
 
         HashMap<DeliveryAssignment, Stack<Location>> routes = manager
                 .getAssignmentPaths(manager.getAssignments());
 
-        for (Map.Entry<DeliveryAssignment, Stack<Location>> route : routes.entrySet()) {
-            DeliveryAssignment assignment = route.getKey();
-            ArtifactPrinter.printDeliveryPath(
-                    route.getValue(), assignment.getSource(), assignment.getDestination());
-        }
-        System.out.printf(
-                "Time taken for slow method: %s milliseconds.\n",
-                Duration.between(start, Instant.now()).toMillis()
-        );
+        ArtifactPrinter.printMultiplePaths(routes, maxRecords);
+        ArtifactPrinter.printTimeTaken("slow", Duration.between(start, Instant.now()).toMillis());
     }
 
-    public static void routeAllDeliveryAssignments(DeliveryManager manager) {
+    public static void routeAllDeliveryAssignments(DeliveryManager manager, int maxRecords) {
+        System.out.println(
+                Colors.ANSI_COLOR_GREEN_BOLD + "\n\nPrinting optimal paths with parallel processing..." +
+                        Colors.ANSI_COLOR_RESET
+        );
         Instant start = Instant.now();
 
         try {
             HashMap<DeliveryAssignment, Stack<Location>> routes = manager
                     .getAssignmentPathsParallel(manager.getAssignments());
 
-            // TODO: Extract to printer
-            for (Map.Entry<DeliveryAssignment, Stack<Location>> route : routes.entrySet()) {
-                DeliveryAssignment assignment = route.getKey();
-                ArtifactPrinter.printDeliveryPath(
-                        route.getValue(), assignment.getSource(), assignment.getDestination());
-            }
-            System.out.printf(
-                    "Time taken for parallel method: %s milliseconds.\n",
-                    Duration.between(start, Instant.now()).toMillis()
-            );
+            ArtifactPrinter.printMultiplePaths(routes, maxRecords);
+            ArtifactPrinter.printTimeTaken("parallel", Duration.between(start, Instant.now()).toMillis());
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
     }
 
-    public static void streamRoutedDeliveries(DeliveryManager manager) {
+    public static void streamRoutedDeliveries(DeliveryManager manager, int maxRecords) {
+        System.out.println(
+                Colors.ANSI_COLOR_GREEN_BOLD + "\n\nPrinting optimal paths with streaming..." +
+                        Colors.ANSI_COLOR_RESET
+        );
         Instant start = Instant.now();
 
         // TODO: getAssugments is silly
         manager.batchDeliveryRoutes(manager.getAssignments())
+                .limit(maxRecords)
                 .forEachOrdered(d ->
                         ArtifactPrinter.printDeliveryPath(
                                 d.getPath(),
@@ -144,10 +142,13 @@ public class Main {
                                 d.getAssignment().getDestination()
                         )
                 );
-        System.out.printf(
-                "Time taken for streaming routed deliveries: %s milliseconds.\n",
-                Duration.between(start, Instant.now()).toMillis()
-        );
+        if (maxRecords < manager.getAssignments().size()) {
+            System.out.printf(
+                    Colors.ANSI_COLOR_CYAN_BOLD + "\n\t\t\t\t------%d records omitted------\n\n" + Colors.ANSI_COLOR_RESET,
+                    manager.getAssignments().size() - maxRecords
+            );
+        }
+        ArtifactPrinter.printTimeTaken("streaming", Duration.between(start, Instant.now()).toMillis());
     }
 }
 

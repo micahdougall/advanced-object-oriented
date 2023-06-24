@@ -2,14 +2,9 @@ package org.example.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.example.entities.Coordinate;
 import org.example.entities.DeliveryAssignment;
-import org.example.entities.DeliveryRoute;
 import org.example.entities.Location;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedList;
 import java.util.Stack;
 
 @Data @AllArgsConstructor
