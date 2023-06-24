@@ -1,16 +1,13 @@
-package org.example;
+package edu.swansea.dougall;
 
 import com.beust.jcommander.Parameter;
-import org.example.validators.FileExists;
-
-import java.util.ArrayList;
-import java.util.List;
+import edu.swansea.dougall.validators.FileExists;
 
 
+/**
+ * Class to define command line arguments for the program.
+ */
 public class Args {
-
-    @Parameter
-    private List<String> parameters = new ArrayList<>();
 
     @Parameter(names={"--assignments", "-a"}, echoInput=true, validateWith=FileExists.class)
     String assignments;
@@ -20,6 +17,9 @@ public class Args {
 
     @Parameter(names={"--print", "-p"}, echoInput=true)
     int print = 20;
+
+    @Parameter(names={"--threads", "-t"}, echoInput=true)
+    int threads = 10;
 
     @Parameter(names={"--debug", "-d"})
     boolean debug = false;

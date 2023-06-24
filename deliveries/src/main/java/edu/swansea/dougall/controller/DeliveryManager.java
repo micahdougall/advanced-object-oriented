@@ -1,30 +1,41 @@
-package org.example.controller;
+package edu.swansea.dougall.controller;
 
-import org.example.Colors;
-import org.example.Main;
-import org.example.entities.*;
-import org.example.model.DeliveryNetwork;
-import org.example.response.RoutedDelivery;
+import edu.swansea.dougall.entities.*;
+import edu.swansea.dougall.model.DeliveryNetwork;
+import edu.swansea.dougall.model.RoutedDelivery;
+import edu.swansea.dougall.util.Colors;
+import edu.swansea.dougall.Main;
+import edu.swansea.dougall.util.Printer;
+import lombok.Getter;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 
+/**
+ * Controller class to manage the delivery network and assign {@link DeliveryAssignment} objects.
+ *
+ * @implNote delegates Getter creation to Lombok.
+ */
+@Getter
 public class DeliveryManager {
 
-    // TODO: Either these are used or not
     private ArrayList<DeliveryRoute> routes;
-    private HashSet<DeliveryAssignment> assignments;
+    private ArrayList<DeliveryAssignment> assignments;
 
 
-    // TODO: Accetp routes as arg for funcitonal
-    public Stream<RoutedDelivery> batchDeliveryRoutes(
-            HashSet<DeliveryAssignment> assignments) {
+    /**
+     * Batches each {@link DeliveryAssignment} with its optimal route according to the lowest
+     * cost through the network from the assignment's source to destination. Uses Java 8 Streams
+     * and returns the {@link RoutedDelivery} objects in sorted order, according to their priority.
+     *
+     * @return Stream of {@link RoutedDelivery} objects.
+     */
+    public Stream<RoutedDelivery> batchDeliveryRoutes() {
 
         return getAssignmentPaths(assignments)
                 .entrySet().stream()
@@ -35,10 +46,19 @@ public class DeliveryManager {
                 .sorted();
     }
 
+    /**
+     * Creates a map of {@link DeliveryAssignment} objects to their optimal route through the
+     * network. Uses #getOptimalPath(DeliveryAssignment) to find the optimal route for each
+     * assignment.
+     *
+     * @param assignments List of {@link DeliveryAssignment} objects to be routed.
+     * @return Map of {@link DeliveryAssignment} objects to their optimal route.
+     */
     public HashMap<DeliveryAssignment, Stack<Location>> getAssignmentPaths(
-            HashSet<DeliveryAssignment> assignments) {
+            ArrayList<DeliveryAssignment> assignments) {
 
         HashMap<DeliveryAssignment, Stack<Location>> routes = new HashMap<>();
+
         for (DeliveryAssignment assignment : assignments) {
             Optional<Stack<Location>> route = getOptimalPath(assignment);
             route.ifPresent(locations -> routes.put(assignment, locations));
@@ -47,13 +67,28 @@ public class DeliveryManager {
     }
 
     // TODO: Check concurrency risks
+    /**
+     * Creates a map of {@link DeliveryAssignment} objects to their optimal route through the
+     * network. Uses #getOptimalPath(DeliveryAssignment) to find the optimal route for each route.
+     *
+     * @implNote Uses parallel processing to execute each call to
+     * {@link #getOptimalPath(DeliveryAssignment)} on a separate thread.
+     *
+     * @param assignments List of {@link DeliveryAssignment} objects to be routed.
+     * @param threadCount Number of threads to use for parallel processing.
+     * @return Map of {@link DeliveryAssignment} objects to their optimal route.
+     *
+     * @throws InterruptedException in case of thread interruption.
+     * @throws ExecutionException in case of thread execution error.
+     */
     public HashMap<DeliveryAssignment, Stack<Location>> getAssignmentPathsParallel(
-            HashSet<DeliveryAssignment> assignments) throws InterruptedException, ExecutionException {
+            ArrayList<DeliveryAssignment> assignments, int threadCount
+    ) throws InterruptedException, ExecutionException {
 
         HashMap<DeliveryAssignment, Stack<Location>> routes = new HashMap<>();
 
         // Parallel processing
-        ExecutorService service = Executors.newFixedThreadPool(6);
+        ExecutorService service = Executors.newFixedThreadPool(threadCount);
         HashMap<DeliveryAssignment, Future<Optional<Stack<Location>>>> futures = new HashMap<>();
         for (DeliveryAssignment assignment : assignments) {
             futures.put(assignment, service.submit(() ->  getOptimalPath(assignment)));
@@ -71,6 +106,18 @@ public class DeliveryManager {
 
     // TODO: Cost of list vs Stack
     // TODO: This should take coordinates, not assignment? And return an Optional
+
+    /**
+     * Finds the optimal route through the network from the source to destination of the
+     * {@link DeliveryAssignment}. Uses a breadth first search to find the shortest path, as
+     * generated in {@link DeliveryNetwork#breadthFirstQueue(Coordinate)}. The cost of each node
+     * is updated for each node in the queue in order and the final path determined by traversing
+     * the network from the destination node to the source node using each {@link Location}'s
+     * parent pointer.
+     *
+     * @param assignment {@link DeliveryAssignment} object to be routed.
+     * @return Optional of Stack of {@link Location} objects representing the optimal route.
+     */
     public Optional<Stack<Location>> getOptimalPath(DeliveryAssignment assignment) {
 
         DeliveryNetwork network = new DeliveryNetwork(routes);
@@ -117,10 +164,18 @@ public class DeliveryManager {
         return Optional.of(path);
     }
 
+    /**
+     * Parses the delivery routes from the given file path and stores them in the {@link #routes}
+     * field. De-duplicates routes with the same start and end coordinates by keeping the route
+     * with the lowest cost. Route names are ignored for comparison.
+     *
+     * @implNote prints all discards and replacements only in debug mode as defined in
+     * {@link Main}, else prints a summary.
+     *
+     * @param filePath Path to the file containing the delivery routes.
+     * @throws IOException in case of file reading error.
+     */
     public void parseRoutes(String filePath) throws IOException {
-        // TODO: Can you optimise size?
-//        int lines = ArtifactReader.lineCount(filePath);
-//        routes = new ArrayList<>(lines, 1);
         routes = new ArrayList<>();
         Scanner in = new Scanner(new File(filePath));
         int discards = 0;
@@ -140,26 +195,19 @@ public class DeliveryManager {
                     Integer.parseInt(line[5])
             );
 
-
             // Optimise for routes with a lower cost
             Optional<DeliveryRoute> existing = findRoute(start, end);
             if (existing.isPresent()) {
                 DeliveryRoute oldRoute = existing.get();
                 if (oldRoute.getCost() <= cost) {
-                    if (Main.debug) {
-                        System.out.printf(
-                                "Discarding %s (cost=%.2f) in favour of existing %s (cost=%.2f)\n",
-                                routeName, cost, oldRoute.getName(), oldRoute.getCost());
-                    }
+                    Printer.debug(
+                            "Discarding %s (cost=%.2f) in favour of existing %s (cost=%.2f)",
+                            routeName, cost, oldRoute.getName(), oldRoute.getCost());
                     discards++;
                     continue;
                 } else {
-                    if (Main.debug) {
-                        System.out.printf(
-                                "Removing %s (cost=%.2f) in favour of new %s (cost=%.2f)\n",
-                                oldRoute.getName(), oldRoute.getCost(), routeName, cost
-                        );
-                    }
+                    Printer.debug("Replacing %s (cost=%.2f) with new %s (cost=%.2f)",
+                            oldRoute.getName(), oldRoute.getCost(), routeName, cost);
                     replacements++;
                     routes.remove(oldRoute);
                 }
@@ -179,9 +227,16 @@ public class DeliveryManager {
 
     }
 
+    /**
+     * Parses the delivery assignments from the given file path and stores them in the
+     * {@link #assignments} field.
+     *
+     * @param inFile Path to the file containing the delivery assignments.
+     * @throws FileNotFoundException in case of file reading error.
+     */
     public void parseAssignments(File inFile) throws FileNotFoundException {
         Scanner in = new Scanner(inFile);
-        assignments = new HashSet<>();
+        assignments = new ArrayList<>();
 
         while (in.hasNextLine()) {
             String[] line = in.nextLine().split(",");
@@ -203,18 +258,17 @@ public class DeliveryManager {
         in.close();
     }
 
+    /**
+     * Finds the {@link DeliveryRoute} with the given start and end coordinates. Returns an
+     * {@link Optional} in case the route is not found.
+     *
+     * @param start Start coordinate of the route.
+     * @param end End coordinate of the route.
+     * @return Optional of the {@link DeliveryRoute} object.
+     */
     public Optional<DeliveryRoute> findRoute(Coordinate start, Coordinate end) {
         return routes.stream()
                 .filter(r -> r.getStart().equals(start) && r.getEnd().equals(end))
                 .findFirst();
-    }
-
-
-    public HashSet<DeliveryAssignment> getAssignments() {
-        return assignments;
-    }
-
-    public ArrayList<DeliveryRoute> getRoutes() {
-        return routes;
     }
 }

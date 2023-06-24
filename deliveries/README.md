@@ -7,5 +7,9 @@ lombok, getters
 
 Stack etc
 
+parallel method: 30276 milliseconds.
+Streaming: 165894 milliseconds
 
+
+Main thing TODO: is to prove the batched process!
 

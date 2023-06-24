@@ -1,9 +1,14 @@
-package org.example.entities;
-
+package edu.swansea.dougall.entities;
 
 import lombok.*;
 
-//@EqualsAndHashCode @AllArgsConstructor
+/**
+ * Class to represent a raw coordinate in the network.
+ *
+ * @implNote uses Lombok tags to generate a getters, setters and a constructor.
+ *
+ * @see Location
+ */
 @AllArgsConstructor
 @Data public class Coordinate {
 
@@ -11,6 +16,7 @@ import lombok.*;
 
     private int  y;
 
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;

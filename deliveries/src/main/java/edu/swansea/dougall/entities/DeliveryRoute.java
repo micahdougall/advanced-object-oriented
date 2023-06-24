@@ -1,12 +1,18 @@
-package org.example.entities;
+package edu.swansea.dougall.entities;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NonNull;
-import org.example.Colors;
+import edu.swansea.dougall.util.Colors;
 
 import java.text.DecimalFormat;
 
+/**
+ * Class to represent a delivery route between two locations in the network. Uses
+ * {@link Coordinate} to represent the start and end points of the route. The cost of the route
+ * may change according to the starting point in the network.
+ *
+ * @implNote uses Lombok Data tags to auto-generate a constructor, getters and setters.
+ */
 @Data @AllArgsConstructor
 public class DeliveryRoute {
 
