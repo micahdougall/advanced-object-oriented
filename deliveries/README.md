@@ -19,6 +19,12 @@ neeed to delete dthe dele4t folder
 </p>
 
 
+TODO:::::!
+
+Order the final output priorit
+Remove spacing
+Make clear total number injested
+
 ## Disclosure
 
 The Javadoc comments for this program have been personally written, but with some autocompletion assistance from [GitHub Copilot](https://resources.github.com/copilot-for-business/?ef_id=_k_1736cd150fab1932bdfba98e3c933d0b_k_&OCID=AIDcmm4lwmjeex_SEM__k_1736cd150fab1932bdfba98e3c933d0b_k_&msclkid=1736cd150fab1932bdfba98e3c933d0b).
@@ -54,20 +60,27 @@ java Main --routes routes.txt --assignments assignments.txt --threads 10
   <img src="configurations.png" alt="drawing" width="600"/><br><br>
 </p>
 
-## Implementation
+## Implementation Notes
 
-For task 4, it should be noted that de-duplication of assignments occur during the parsing step as seen in `parseAssignments` in the [DeliveryManager](src/main/java/edu/swansea/dougall/controller/DeliveryManager.java). The de-duplication takes account of the priority of the duplicated assignment to ensure that a high priority assignment is not designated a lower priority due to a data input error.
+➫  For task 4, it should be noted that de-duplication of assignments occur during the parsing step as seen in `parseAssignments` in the [DeliveryManager](src/main/java/edu/swansea/dougall/controller/DeliveryManager.java). The de-duplication takes account of the priority of the duplicated assignment to ensure that a high priority assignment is not designated a lower priority due to a data input error.
 
-A similar logic is also applied to the routes which are read into the manager in `parseRoutes`. This is to remove any surplus routes which clog the network but do not offer any value. In this case, the costs of the routes are compared such that only the *lower* cost route is kept in the network. This is effectively pre-optimising the network by taking advantage of multiple options for the same route.
+➫  A similar logic is also applied to the routes which are read into the manager in `parseRoutes`. This is to remove any surplus routes which clog the network but do not offer any value. In this case, the costs of the routes are compared such that only the *lower* cost route is kept in the network. This is effectively pre-optimising the network by taking advantage of multiple options for the same route.
 
 ## Performance
 
-In testing, the performance times for parallel versus streaming for the *large* files were as follows:
+For computing all assignment routes in the network, the performance times for parallel versus streaming for the files were as follows (all times in milliseconds):
 
-- Parallel: 30,276 milliseconds.
-- Streaming: 165,894 milliseconds
+
+| Size | Sequential | Parallel | Stream |
+| ---- | :----------: | :--------: | :------: |
+| Small | 38 | 38 | *33\** |
+| Medium | 118 | 31 | *99\** |
+| Large | *n/a* | 19,969 | 123,323 |
+| Extra Large | | | |
 
 These are printed as part of the program execution.
+
+*\*these are indicative timings but not proper tests as they include the printing step, which for the Streaming option includes all records for small/medium files.*
 
 ## System
 

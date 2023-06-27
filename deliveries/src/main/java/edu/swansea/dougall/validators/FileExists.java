@@ -14,7 +14,7 @@ public class FileExists implements IParameterValidator {
      * Checks if a file exists in the resources folder.
      * @param name the name of the parameter, i.e. the filename argument.
      * @param value the value of the parameter, i.e. the filename.
-     * @throws ParameterException
+     * @throws ParameterException if the file does not exist.
      */
     @Override
     public void validate(String name, String value) throws ParameterException {

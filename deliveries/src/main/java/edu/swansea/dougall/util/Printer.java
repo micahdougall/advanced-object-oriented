@@ -1,9 +1,10 @@
 package edu.swansea.dougall.util;
 
 import edu.swansea.dougall.Main;
-import edu.swansea.dougall.entities.Location;
+import edu.swansea.dougall.artifacts.DeliveryRoute;
 import edu.swansea.dougall.entities.Coordinate;
 import edu.swansea.dougall.artifacts.DeliveryAssignment;
+import edu.swansea.dougall.entities.Priority;
 
 import java.text.DecimalFormat;
 import java.util.*;
@@ -48,23 +49,28 @@ public class Printer {
      * @param routes the HashMap of {@code DeliveryAssignment} objects to be printed.
      * @param maxRecords the maximum number of records ot be printed, following which a count of
      *                   the remaining unprinted records will be displayed.
-     * @see #deliveryPath(Stack, Coordinate, Coordinate)
+     * @see #deliveryPath(Stack, Priority, Coordinate, Coordinate)
      */
     public static void multiplePaths(
-            HashMap<DeliveryAssignment, Stack<Location>> routes, int maxRecords
+            HashMap<DeliveryAssignment, Stack<DeliveryRoute>> routes, int maxRecords
     ) {
         int records = routes.size();
         int printRecords = Math.min(records, maxRecords);
+        info(
+            String.format("%d total routes are available in the network.", records),
+                Colors.ANSI_BOLD_WHITE
+        );
 
-        List<Map.Entry<DeliveryAssignment, Stack<Location>>> samples = routes.entrySet()
+        List<Map.Entry<DeliveryAssignment, Stack<DeliveryRoute>>> samples = routes.entrySet()
                 .stream()
                 .limit(printRecords)
                 .collect(Collectors.toList());
 
-        for (Map.Entry<DeliveryAssignment, Stack<Location>> route : samples) {
+        for (Map.Entry<DeliveryAssignment, Stack<DeliveryRoute>> route : samples) {
             DeliveryAssignment assignment = route.getKey();
             deliveryPath(
-                    route.getValue(), assignment.getSource(), assignment.getDestination());
+                    route.getValue(), assignment.getPriority(), assignment.getSource(),
+                    assignment.getDestination());
         }
         if (printRecords < records) {
             omitted(records - printRecords);
@@ -78,16 +84,18 @@ public class Printer {
      * @param start the {@code Coordinate} of the start of the path.
      * @param end the {@code Coordinate} of the end of the path.
      */
-    public static void deliveryPath(Stack<Location> path, Coordinate start, Coordinate end) {
+    public static void deliveryPath(
+            Stack<DeliveryRoute> path, Priority priority, Coordinate start, Coordinate end) {
         DecimalFormat formatter = new DecimalFormat("###,###.00");
         String currency = String.format("£%S", formatter.format(path.peek().getCost()));
         System.out.printf(
+                "%s\t" +
                 Colors.ANSI_COLOR_CYAN_BOLD + "%-12s" + Colors.ANSI_COLOR_PURPLE + " ➫ " +
                         Colors.ANSI_COLOR_CYAN_BOLD + "%-12s" +
                         Colors.ANSI_COLOR_YELLOW + "%10s: ",
-                start, end, currency);
-        for (Location location : path) {
-            System.out.printf(Colors.ANSI_BOLD_WHITE + "⤑%s", location.getPoint());
+                priority, start, end, currency);
+        for (DeliveryRoute route : path) {
+            System.out.printf(Colors.ANSI_BOLD_WHITE + "%s⤑%s ", route.getStart(), route.getEnd());
         }
         System.out.println(Colors.ANSI_COLOR_RESET);
     }
@@ -123,16 +131,14 @@ public class Printer {
      *
      * @param text the text to be printed.
      * @param color the color to be used to print the text.
-     * @param args the arguments to be passed to the {@code String.format()} method.
      */
     public static void info(String text, String color) {
-        System.out.printf(color + "\n%s\n" + Colors.ANSI_COLOR_RESET, text);
+        System.out.printf(color + "%s\n" + Colors.ANSI_COLOR_RESET, text);
     }
 
     /**
      * Prints a message to the console.
      * @param text the text to be printed.
-     * @param entity the entity to be printed.
      */
     public static void warning(String text) {
         System.out.printf(
@@ -159,7 +165,6 @@ public class Printer {
      * to true.
      *
      * @param text the text to be printed.
-     * @param args the arguments to be passed to the {@code String.format()} method.
      */
     public static void debug(String text) {
         if (Main.debug) {

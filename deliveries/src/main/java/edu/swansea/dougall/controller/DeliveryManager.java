@@ -40,7 +40,7 @@ public class DeliveryManager {
     public Stream<RoutedDelivery> batchDeliveryRoutes() {
 
         return getAssignmentPaths(assignments)
-                .entrySet().stream()
+                .entrySet().parallelStream()
                 .map(e -> new RoutedDelivery(
                         e.getKey(),
                         e.getValue(),
@@ -56,14 +56,14 @@ public class DeliveryManager {
      * @param assignments List of {@link DeliveryAssignment} objects to be routed.
      * @return Map of {@link DeliveryAssignment} objects to their optimal route.
      */
-    public HashMap<DeliveryAssignment, Stack<Location>> getAssignmentPaths(
+    public HashMap<DeliveryAssignment, Stack<DeliveryRoute>> getAssignmentPaths(
             ArrayList<DeliveryAssignment> assignments) {
 
-        HashMap<DeliveryAssignment, Stack<Location>> routes = new HashMap<>();
+        HashMap<DeliveryAssignment, Stack<DeliveryRoute>> routes = new HashMap<>();
 
         for (DeliveryAssignment assignment : assignments) {
-            Optional<Stack<Location>> route = getOptimalPath(assignment);
-            route.ifPresent(locations -> routes.put(assignment, locations));
+            Optional<Stack<DeliveryRoute>> route = getOptimalPath(assignment);
+            route.ifPresent(deliveryRoutes -> routes.put(assignment, deliveryRoutes));
         }
         return routes;
     }
@@ -82,44 +82,43 @@ public class DeliveryManager {
      * @throws InterruptedException in case of thread interruption.
      * @throws ExecutionException in case of thread execution error.
      */
-    public HashMap<DeliveryAssignment, Stack<Location>> getAssignmentPathsParallel(
+    public HashMap<DeliveryAssignment, Stack<DeliveryRoute>> getAssignmentPathsParallel(
             ArrayList<DeliveryAssignment> assignments, int threadCount
     ) throws InterruptedException, ExecutionException {
 
-        HashMap<DeliveryAssignment, Stack<Location>> routes = new HashMap<>();
+        HashMap<DeliveryAssignment, Stack<DeliveryRoute>> routes = new HashMap<>();
 
         // Parallel processing
         ExecutorService service = Executors.newFixedThreadPool(threadCount);
-        HashMap<DeliveryAssignment, Future<Optional<Stack<Location>>>> futures = new HashMap<>();
+        HashMap<DeliveryAssignment, Future<Optional<Stack<DeliveryRoute>>>> futures = new HashMap<>();
         for (DeliveryAssignment assignment : assignments) {
             futures.put(assignment, service.submit(() ->  getOptimalPath(assignment)));
-        };
+        }
         service.shutdown();
         while (!service.awaitTermination(500, TimeUnit.MILLISECONDS));
 
         // Get futures as map
-        for (Map.Entry<DeliveryAssignment, Future<Optional<Stack<Location>>>> future : futures.entrySet()) {
-            Optional<Stack<Location>> path = future.getValue().get();
-            path.ifPresent(locations -> routes.put(future.getKey(), locations));
+        for (Map.Entry<DeliveryAssignment, Future<Optional<Stack<DeliveryRoute>>>> future :
+                futures.entrySet()) {
+            Optional<Stack<DeliveryRoute>> path = future.getValue().get();
+            path.ifPresent(deliveryRoutes -> routes.put(future.getKey(), deliveryRoutes));
         }
         return routes;
     }
 
-    // TODO: Cost of list vs Stack
-    // TODO: This should take coordinates, not assignment? And return an Optional
 
     /**
      * Finds the optimal route through the network from the source to destination of the
      * {@link DeliveryAssignment}. Uses a breadth first search to find the shortest path, as
-     * generated in {@link DeliveryNetwork#breadthFirstQueue(Coordinate)}. The cost of each node
-     * is updated for each node in the queue in order and the final path determined by traversing
-     * the network from the destination node to the source node using each {@link Location}'s
-     * parent pointer.
+     * generated in {@link DeliveryNetwork#breadthFirstQueue(Coordinate)}. The cost of each node is
+     * updated for each node in the queue in order and the final path determined by traversing the
+     * network from the destination node to the source node using each {@link Location}'s parent
+     * pointer.
      *
      * @param assignment {@link DeliveryAssignment} object to be routed.
      * @return Optional of Stack of {@link Location} objects representing the optimal route.
      */
-    public Optional<Stack<Location>> getOptimalPath(DeliveryAssignment assignment) {
+    public Optional<Stack<DeliveryRoute>> getOptimalPath(DeliveryAssignment assignment) {
 
         DeliveryNetwork network = new DeliveryNetwork(routes);
 
@@ -132,6 +131,7 @@ public class DeliveryManager {
 
         HashSet<Coordinate> neighbours;
 
+        // Use Locations to keep computation minimal
         Location currentLocation;
         while (!queue.isEmpty()) {
             currentNode = queue.poll();
@@ -143,12 +143,15 @@ public class DeliveryManager {
 
             if (neighbours != null) {
                 for (Coordinate node : neighbours) {
-                    double routeCost = findRoute(currentNode, node).get().getCost();
-                    network.updateCost(node, currentNodeCost + routeCost, currentNode);
+                    Optional<DeliveryRoute> routeCost = findRoute(currentNode, node);
+                    Coordinate finalCurrentNode = currentNode;
+                    routeCost.ifPresent(
+                            deliveryRoute -> network.updateCost(node,
+                                currentNodeCost + deliveryRoute.getCost(), finalCurrentNode)
+                    );
                 }
             }
         }
-
         Stack<Location> path = new Stack<>();
 
         Location targetLocation = network.getNode(assignment.getDestination());
@@ -161,8 +164,24 @@ public class DeliveryManager {
         if (!path.contains(startLocation)) {
             return Optional.empty();
         }
-        Collections.reverse(path);
-        return Optional.of(path);
+
+
+        // Don't need start node as included as parent in neighbour
+        path.remove(path.size() - 1);
+
+        // Reverse stack and convert to DeliveryRoutes
+        Stack<DeliveryRoute> deliveryPath = new Stack<>();
+        for (Location location : path) {
+            findRoute(location.getParent(), location.getPoint()).ifPresent(deliveryPath::push);
+        }
+        Collections.reverse(deliveryPath);
+
+        if (deliveryPath.isEmpty()) {
+            return Optional.empty();
+        }
+
+        // Convert to stack of DeliveryRoutes
+        return Optional.of(deliveryPath);
     }
 
     /**
@@ -216,7 +235,7 @@ public class DeliveryManager {
                     replacements++;
                     routes.remove(oldRoute);
                 }
-            };
+            }
             routes.add(new DeliveryRoute(routeName, start, end, cost));
         }
         if (discards + replacements > 0) {
@@ -228,6 +247,11 @@ public class DeliveryManager {
                     discards, replacements
             );
         }
+        Printer.info(
+                String.format(
+                        "A total of %d routes have been added to the network.\n", routes.size()
+                ), Colors.ANSI_BOLD_WHITE
+        );
         in.close();
 
     }
@@ -263,7 +287,7 @@ public class DeliveryManager {
             Optional<DeliveryAssignment> existing = findAssignment(source, destination);
             if (existing.isPresent()) {
                 DeliveryAssignment oldAssignment = existing.get();
-                if (oldAssignment.getPriority().compareTo(priority) > 0) {
+                if (oldAssignment.getPriority().compareTo(priority) <= 0) {
                     Printer.debug(
                         String.format(
                             "Discarding %s (priority=%s) in favour of existing %s (priority=%s)",
@@ -282,7 +306,7 @@ public class DeliveryManager {
                     replacements++;
                     assignments.remove(oldAssignment);
                 }
-            };
+            }
             assignments.add(new DeliveryAssignment(description, priority, source, destination));
         }
         if (discards + replacements > 0) {
@@ -290,11 +314,17 @@ public class DeliveryManager {
                     Colors.ANSI_BOLD_WHITE + "\n\nDuplicates routes found!\n" +
                             Colors.ANSI_COLOR_CYAN_BOLD +
                             "Discarded %d assignments and replaced %d in favour of higher " +
-                            "prioritisation in the data.\n\n" +
+                            "prioritisation in the data.\n" +
                             Colors.ANSI_COLOR_RESET,
                     discards, replacements
             );
         }
+        Printer.info(
+                String.format(
+                        "A total of %d assignments have been added to the deliveries.\n",
+                        assignments.size()
+                ), Colors.ANSI_BOLD_WHITE
+        );
         in.close();
     }
 

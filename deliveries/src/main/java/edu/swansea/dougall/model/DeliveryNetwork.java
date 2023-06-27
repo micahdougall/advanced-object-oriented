@@ -56,7 +56,7 @@ public class DeliveryNetwork {
     }
 
     /**
-     * Generates a queue of {@link Coordinate} nodes in the order the should be visited in for a
+     * Generates a queue of {@link Coordinate} nodes in the order they should be visited in for a
      * breadth-first search of the network, starting from the given {@link Coordinate} node. This
      * is effectively the first step in Dijkstra's algorithm for finding the shortest path
      * between the start node provided and a subsequent target node.
@@ -72,10 +72,8 @@ public class DeliveryNetwork {
 
         while (!queue.isEmpty()) {
             Coordinate next = queue.poll();
-//            System.out.println("Coordinate = " + next);
             HashSet<Coordinate> children = getNode(next).getChildren();
 
-//            System.out.println("Children = " + children);
             if (children != null) {
                 for (Coordinate child : children) {
                     if (!visitSequence.contains(child)) {

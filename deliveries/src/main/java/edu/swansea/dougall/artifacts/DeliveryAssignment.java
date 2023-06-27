@@ -52,22 +52,6 @@ public class DeliveryAssignment implements Comparable<DeliveryAssignment> {
 
     @Override
     public String toString() {
-        // Colour code the priority
-        String flag = "";
-        switch (priority) {
-            case LOW:
-                flag = String.format(
-                        Colors.ANSI_COLOR_GREEN + "%-6s" + Colors.ANSI_COLOR_RESET, priority );
-                break;
-            case MEDIUM:
-                flag = String.format(
-                        Colors.ANSI_COLOR_YELLOW + "%-6s" + Colors.ANSI_COLOR_RESET, priority );
-                break;
-            case HIGH:
-                flag = String.format(
-                        Colors.ANSI_COLOR_RED + "%-6s" + Colors.ANSI_COLOR_RESET, priority );
-                break;
-        }
         return String.format(
                 Colors.ANSI_COLOR_PURPLE + "\t ➫ %s " +
                         Colors.ANSI_COLOR_RESET + "%14s" +
@@ -75,7 +59,7 @@ public class DeliveryAssignment implements Comparable<DeliveryAssignment> {
                         Colors.ANSI_COLOR_RESET + "%-14s" +
                         Colors.ANSI_BOLD_WHITE + "%s" +
                         Colors.ANSI_COLOR_RESET,
-                flag, source, destination, description
+                priority, source, destination, description
         );
     }
 }

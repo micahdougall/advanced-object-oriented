@@ -1,6 +1,5 @@
 package edu.swansea.dougall.artifacts;
 
-import edu.swansea.dougall.entities.Location;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -20,9 +19,7 @@ public class RoutedDelivery implements Comparable<RoutedDelivery> {
 
     private DeliveryAssignment assignment;
 
-    // TODO: Convert to DeliveryRoute
-//    private LinkedList<DeliveryRoute> path;
-    private Stack<Location> path;
+    private Stack<DeliveryRoute> path;
 
     private double cost;
 

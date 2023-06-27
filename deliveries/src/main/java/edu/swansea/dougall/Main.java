@@ -4,7 +4,6 @@ import com.beust.jcommander.JCommander;
 import edu.swansea.dougall.controller.DeliveryManager;
 import edu.swansea.dougall.entities.Coordinate;
 import edu.swansea.dougall.artifacts.DeliveryRoute;
-import edu.swansea.dougall.entities.Location;
 import edu.swansea.dougall.entities.Priority;
 import edu.swansea.dougall.util.Colors;
 import edu.swansea.dougall.util.Printer;
@@ -55,9 +54,9 @@ public class Main {
         }
         routeAllDeliveryAssignments(manager, args.print, args.threads);
 
-        // Streamed Routed Deliveries
-        // TODO: Needs to use parallel processing too
-        streamRoutedDeliveries(manager, args.print);
+        // Print all RoutedDeliveries for smaller files to show priority sorting
+        int maxRecords = (args.routes.contains("large") ? args.print : Integer.MAX_VALUE);
+        streamRoutedDeliveries(manager, maxRecords);
     }
 
     public static void testAssignmentEquality() {
@@ -77,7 +76,7 @@ public class Main {
             Printer.warning("Assertion error in testAssignmentEquality");
             throw e;
         }
-        Printer.info("Assignment equality tests passed", Colors.ANSI_BOLD_WHITE);
+        Printer.info("\nAssignment equality tests passed\n", Colors.ANSI_BOLD_WHITE);
     }
 
 
@@ -142,8 +141,9 @@ public class Main {
 
             Optional<DeliveryRoute> route = manager.findRoute(start, end);
             if (route.isPresent()) {
+                String routeString = String.format("%s⤑%s", start, end);
                 Printer.info(
-                        String.format("Route for coordinates: %s⤑%s %s", start, end, route.get()),
+                        String.format("Route for coordinates: %21s %s", routeString, route.get()),
                         Colors.ANSI_BOLD_WHITE);
             } else {
                 Printer.heading(String.format("Item not found for coordinates: %s⤑%s", start, end));
@@ -166,10 +166,11 @@ public class Main {
             int random = new Random().nextInt(manager.getAssignments().size());
             DeliveryAssignment assignment = manager.getAssignments().get(random);
 
-            Optional<Stack<Location>> path = manager.getOptimalPath(assignment);
+            Optional<Stack<DeliveryRoute>> path = manager.getOptimalPath(assignment);
             if (path.isPresent()) {
                 Printer.deliveryPath(
-                        path.get(), assignment.getSource(), assignment.getDestination());
+                        path.get(), assignment.getPriority(), assignment.getSource(),
+                        assignment.getDestination());
             } else {
                 Printer.warning(
                         String.format("No route available for assignment: %s", assignment)
@@ -193,11 +194,11 @@ public class Main {
         Printer.heading("Printing optimal paths without threading...");
         Instant start = Instant.now();
 
-        HashMap<DeliveryAssignment, Stack<Location>> routes = manager
+        HashMap<DeliveryAssignment, Stack<DeliveryRoute>> routes = manager
                 .getAssignmentPaths(manager.getAssignments());
 
         Printer.multiplePaths(routes, maxRecords);
-        Printer.timeTaken("slow", Duration.between(start, Instant.now()).toMillis());
+        Printer.timeTaken("sequential", Duration.between(start, Instant.now()).toMillis());
     }
 
     /**
@@ -217,7 +218,7 @@ public class Main {
         Instant start = Instant.now();
 
         try {
-            HashMap<DeliveryAssignment, Stack<Location>> routes = manager
+            HashMap<DeliveryAssignment, Stack<DeliveryRoute>> routes = manager
                     .getAssignmentPathsParallel(manager.getAssignments(), threads);
 
             Printer.multiplePaths(routes, maxRecords);
@@ -238,7 +239,7 @@ public class Main {
      * @param maxRecords number of records to print after file has been ingested.
      */
     public static void streamRoutedDeliveries(DeliveryManager manager, int maxRecords) {
-        Printer.heading("Printing optimal paths with streaming...");
+        Printer.heading("Printing optimal paths with streaming, in priority order...");
         Instant start = Instant.now();
 
         manager.batchDeliveryRoutes()
@@ -246,6 +247,7 @@ public class Main {
                 .forEachOrdered(d ->
                         Printer.deliveryPath(
                                 d.getPath(),
+                                d.getAssignment().getPriority(),
                                 d.getAssignment().getSource(),
                                 d.getAssignment().getDestination()
                         )

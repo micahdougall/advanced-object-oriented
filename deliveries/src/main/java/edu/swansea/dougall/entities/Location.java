@@ -19,7 +19,7 @@ import java.util.HashSet;
  * @see Coordinate
  */
 @RequiredArgsConstructor
-@Data public class Location implements Comparable {
+@Data public class Location implements Comparable<Location> {
 
     @NonNull
     private Coordinate point;
@@ -47,14 +47,8 @@ import java.util.HashSet;
     }
 
     @Override
-    public int compareTo(Object o) {
-        try {
-            Location c = (Location) o;
-            return (int) (cost - c.getCost());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return 0;
+    public int compareTo(Location location) {
+        return (int) (cost - location.getCost());
     }
 
     @Override
