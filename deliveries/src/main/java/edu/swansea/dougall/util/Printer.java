@@ -3,7 +3,7 @@ package edu.swansea.dougall.util;
 import edu.swansea.dougall.Main;
 import edu.swansea.dougall.entities.Location;
 import edu.swansea.dougall.entities.Coordinate;
-import edu.swansea.dougall.entities.DeliveryAssignment;
+import edu.swansea.dougall.artifacts.DeliveryAssignment;
 
 import java.text.DecimalFormat;
 import java.util.*;
@@ -32,7 +32,7 @@ public class Printer {
         int printRecords = Math.min(records, maxRecords);
         Iterator<E> iter = artifacts.iterator();
 
-        heading("Printing report for %d of %d artifacts...", printRecords, records);
+        heading(String.format("Printing report for %d of %d artifacts...", printRecords, records));
 
         for (int i = 0; i < printRecords; i++) {
             System.out.println(iter.next());
@@ -119,27 +119,14 @@ public class Printer {
     }
 
     /**
-     * Prints a heading to the console with a variable number of arguments.
-     *
-     * @param text the text to be printed as a heading.
-     * @param args the arguments to be passed to the {@code String.format()} method.
-     */
-    public static void heading(String text, Object... args) {
-        String resolvedText = String.format(text, args);
-        System.out.printf(
-                Colors.ANSI_COLOR_GREEN_BOLD + "\n%s\n" + Colors.ANSI_COLOR_RESET, resolvedText);
-    }
-
-    /**
      * Prints a message to the console.
      *
      * @param text the text to be printed.
      * @param color the color to be used to print the text.
      * @param args the arguments to be passed to the {@code String.format()} method.
      */
-    public static void info(String text, String color, Object... args) {
-        String resolvedText = String.format(text, args);
-        System.out.printf(color + "%s\n" + Colors.ANSI_COLOR_RESET, resolvedText);
+    public static void info(String text, String color) {
+        System.out.printf(color + "\n%s\n" + Colors.ANSI_COLOR_RESET, text);
     }
 
     /**
@@ -147,10 +134,9 @@ public class Printer {
      * @param text the text to be printed.
      * @param entity the entity to be printed.
      */
-    public static void warning(String text, Object entity) {
+    public static void warning(String text) {
         System.out.printf(
-                Colors.ANSI_COLOR_GREEN_BOLD + "\n%s%s\n" + Colors.ANSI_COLOR_RESET,
-                text, entity
+                Colors.ANSI_COLOR_GREEN_BOLD + "\n%s\n" + Colors.ANSI_COLOR_RESET, text
         );
     }
 
@@ -175,10 +161,9 @@ public class Printer {
      * @param text the text to be printed.
      * @param args the arguments to be passed to the {@code String.format()} method.
      */
-    public static void debug(String text, Object... args) {
+    public static void debug(String text) {
         if (Main.debug) {
-            String resolvedText = String.format(text, args);
-            System.out.printf("%s\n", resolvedText);
+            System.out.printf("%s\n", text);
         }
     }
 }

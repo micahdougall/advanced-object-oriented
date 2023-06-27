@@ -1,5 +1,8 @@
-package edu.swansea.dougall.entities;
+package edu.swansea.dougall.artifacts;
 
+import edu.swansea.dougall.entities.Coordinate;
+import edu.swansea.dougall.entities.Location;
+import edu.swansea.dougall.entities.Priority;
 import edu.swansea.dougall.util.Colors;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -21,11 +24,11 @@ public class DeliveryAssignment implements Comparable<DeliveryAssignment> {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == this) return true;
-        if (obj instanceof DeliveryAssignment) {
-            DeliveryAssignment other = (DeliveryAssignment) obj;
-            return source.equals(other.source) && destination.equals(other.destination);
-        } else return false;
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+
+        DeliveryAssignment other = (DeliveryAssignment) obj;
+        return source.equals(other.source) && destination.equals(other.destination);
     }
 
     @Override
@@ -35,6 +38,13 @@ public class DeliveryAssignment implements Comparable<DeliveryAssignment> {
         return hashCode;
     }
 
+    /**
+     * Compare the priority of this assignment to another using their priority levels.
+     *
+     * @param other the other assignment to compare to
+     * @return -1 if this assignment has a lower priority, 0 if they are the same, 1 if
+     * the other assignment has a lower priority.
+     */
     @Override
     public int compareTo(DeliveryAssignment other) {
         return this.priority.compareTo(other.getPriority());

@@ -1,5 +1,6 @@
-package edu.swansea.dougall.entities;
+package edu.swansea.dougall.artifacts;
 
+import edu.swansea.dougall.entities.Coordinate;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import edu.swansea.dougall.util.Colors;
@@ -21,17 +22,16 @@ public class DeliveryRoute {
     private Coordinate start;
 
     private Coordinate end;
+
     private double cost;
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
 
-        DeliveryRoute route = (DeliveryRoute) o;
-
-        if (!start.equals(route.start)) return false;
-        return end.equals(route.end);
+        DeliveryRoute route = (DeliveryRoute) obj;
+        return start.equals(route.start) && end.equals(route.end);
     }
 
     @Override

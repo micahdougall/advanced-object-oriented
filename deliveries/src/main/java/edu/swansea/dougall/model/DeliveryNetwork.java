@@ -2,7 +2,7 @@ package edu.swansea.dougall.model;
 
 import edu.swansea.dougall.entities.Location;
 import edu.swansea.dougall.entities.Coordinate;
-import edu.swansea.dougall.entities.DeliveryRoute;
+import edu.swansea.dougall.artifacts.DeliveryRoute;
 
 import lombok.Getter;
 import java.util.*;

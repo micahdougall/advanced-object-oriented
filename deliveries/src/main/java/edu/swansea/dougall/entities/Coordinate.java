@@ -17,14 +17,12 @@ import lombok.*;
     private int  y;
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
 
-        Coordinate that = (Coordinate) o;
-
-        if (x != that.x) return false;
-        return y == that.y;
+        Coordinate that = (Coordinate) obj;
+        return x == that.x && y == that.y;
     }
 
     @Override

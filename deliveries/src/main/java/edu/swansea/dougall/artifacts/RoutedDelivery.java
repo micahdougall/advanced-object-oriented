@@ -1,9 +1,8 @@
-package edu.swansea.dougall.model;
+package edu.swansea.dougall.artifacts;
 
 import edu.swansea.dougall.entities.Location;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import edu.swansea.dougall.entities.DeliveryAssignment;
 
 import java.util.Stack;
 

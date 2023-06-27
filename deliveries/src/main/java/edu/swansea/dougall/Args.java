@@ -10,16 +10,16 @@ import edu.swansea.dougall.validators.FileExists;
 public class Args {
 
     @Parameter(names={"--assignments", "-a"}, echoInput=true, validateWith=FileExists.class)
-    String assignments;
+    String assignments = "assignments.txt";
 
     @Parameter(names={"--routes", "-r"}, echoInput=true, validateWith=FileExists.class)
-    String routes;
-
-    @Parameter(names={"--print", "-p"}, echoInput=true)
-    int print = 20;
+    String routes = "routes.txt";
 
     @Parameter(names={"--threads", "-t"}, echoInput=true)
     int threads = 10;
+
+    @Parameter(names={"--print", "-p"}, echoInput=true)
+    int print = 20;
 
     @Parameter(names={"--debug", "-d"})
     boolean debug = false;

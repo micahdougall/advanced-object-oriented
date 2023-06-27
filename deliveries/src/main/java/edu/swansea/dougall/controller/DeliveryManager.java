@@ -1,8 +1,10 @@
 package edu.swansea.dougall.controller;
 
+import edu.swansea.dougall.artifacts.DeliveryAssignment;
+import edu.swansea.dougall.artifacts.DeliveryRoute;
 import edu.swansea.dougall.entities.*;
 import edu.swansea.dougall.model.DeliveryNetwork;
-import edu.swansea.dougall.model.RoutedDelivery;
+import edu.swansea.dougall.artifacts.RoutedDelivery;
 import edu.swansea.dougall.util.Colors;
 import edu.swansea.dougall.Main;
 import edu.swansea.dougall.util.Printer;
@@ -66,7 +68,6 @@ public class DeliveryManager {
         return routes;
     }
 
-    // TODO: Check concurrency risks
     /**
      * Creates a map of {@link DeliveryAssignment} objects to their optimal route through the
      * network. Uses #getOptimalPath(DeliveryAssignment) to find the optimal route for each route.
@@ -201,13 +202,17 @@ public class DeliveryManager {
                 DeliveryRoute oldRoute = existing.get();
                 if (oldRoute.getCost() <= cost) {
                     Printer.debug(
+                        String.format(
                             "Discarding %s (cost=%.2f) in favour of existing %s (cost=%.2f)",
-                            routeName, cost, oldRoute.getName(), oldRoute.getCost());
+                            routeName, cost, oldRoute.getName(), oldRoute.getCost())
+                    );
                     discards++;
                     continue;
                 } else {
-                    Printer.debug("Replacing %s (cost=%.2f) with new %s (cost=%.2f)",
-                            oldRoute.getName(), oldRoute.getCost(), routeName, cost);
+                    Printer.debug(
+                        String.format("Replacing %s (cost=%.2f) with new %s (cost=%.2f)",
+                               oldRoute.getName(), oldRoute.getCost(), routeName, cost)
+                    );
                     replacements++;
                     routes.remove(oldRoute);
                 }
@@ -216,9 +221,9 @@ public class DeliveryManager {
         }
         if (discards + replacements > 0) {
             System.out.printf(
-                    Colors.ANSI_BOLD_WHITE + "\n\nDuplicates routes found!\n" +
+                    Colors.ANSI_BOLD_WHITE + "Duplicates routes found!\n" +
                     Colors.ANSI_COLOR_CYAN_BOLD +
-                            "Discarded %d routes and replaced %d in favour of lower costs routes.\n\n" +
+                            "Discarded %d routes and replaced %d in favour of lower costs routes.\n" +
                             Colors.ANSI_COLOR_RESET,
                     discards, replacements
             );
@@ -237,23 +242,58 @@ public class DeliveryManager {
     public void parseAssignments(File inFile) throws FileNotFoundException {
         Scanner in = new Scanner(inFile);
         assignments = new ArrayList<>();
+        int discards = 0;
+        int replacements = 0;
 
         while (in.hasNextLine()) {
             String[] line = in.nextLine().split(",");
 
-            DeliveryAssignment newAssignments = new DeliveryAssignment(
-                    line[3],
-                    Priority.valueOf(line[2]),
-                    new Coordinate(
-                            Integer.parseInt(line[0]),
-                            Integer.parseInt(line[1])
-                    ),
-                    new Coordinate(
-                            Integer.parseInt(line[4]),
-                            Integer.parseInt(line[5])
-                    )
+            String description = line[3];
+            Priority priority = Priority.valueOf(line[2]);
+            Coordinate source = new Coordinate(
+                    Integer.parseInt(line[0]),
+                    Integer.parseInt(line[1])
             );
-            assignments.add(newAssignments);
+            Coordinate destination = new Coordinate(
+                    Integer.parseInt(line[4]),
+                    Integer.parseInt(line[5])
+            );
+
+            // Retain assignments with the highest priority
+            Optional<DeliveryAssignment> existing = findAssignment(source, destination);
+            if (existing.isPresent()) {
+                DeliveryAssignment oldAssignment = existing.get();
+                if (oldAssignment.getPriority().compareTo(priority) > 0) {
+                    Printer.debug(
+                        String.format(
+                            "Discarding %s (priority=%s) in favour of existing %s (priority=%s)",
+                                description, priority, oldAssignment.getDescription(),
+                                oldAssignment.getPriority())
+                    );
+                    discards++;
+                    continue;
+                } else {
+                    Printer.debug(
+                            String.format(
+                                    "Replacing %s (priority=%s) with new %s (priority=%s)",
+                                    description, priority, oldAssignment.getDescription(),
+                                    oldAssignment.getPriority())
+                    );
+                    replacements++;
+                    assignments.remove(oldAssignment);
+                }
+            };
+            assignments.add(new DeliveryAssignment(description, priority, source, destination));
+        }
+        if (discards + replacements > 0) {
+            System.out.printf(
+                    Colors.ANSI_BOLD_WHITE + "\n\nDuplicates routes found!\n" +
+                            Colors.ANSI_COLOR_CYAN_BOLD +
+                            "Discarded %d assignments and replaced %d in favour of higher " +
+                            "prioritisation in the data.\n\n" +
+                            Colors.ANSI_COLOR_RESET,
+                    discards, replacements
+            );
         }
         in.close();
     }
@@ -267,8 +307,30 @@ public class DeliveryManager {
      * @return Optional of the {@link DeliveryRoute} object.
      */
     public Optional<DeliveryRoute> findRoute(Coordinate start, Coordinate end) {
-        return routes.stream()
-                .filter(r -> r.getStart().equals(start) && r.getEnd().equals(end))
-                .findFirst();
+        for (DeliveryRoute route : routes) {
+            if (route.getStart().equals(start) && route.getEnd().equals(end)) {
+                return Optional.of(route);
+            }
+        }
+        return Optional.empty();
+    }
+
+
+    /**
+     * Finds the {@link DeliveryAssignment} with the given source and destination coordinates. Returns
+     * an {@link Optional} in case the assignment is not found.
+     *
+     * @param source Source coordinate of the assignment.
+     * @param destination Destination coordinate of the assignment.
+     * @return Optional of the {@link DeliveryAssignment} object.
+     */
+    public Optional<DeliveryAssignment> findAssignment(Coordinate source, Coordinate destination) {
+        for (DeliveryAssignment assignment : assignments) {
+            if (assignment.getSource().equals(source)
+                    && assignment.getDestination().equals(destination)) {
+                return Optional.of(assignment);
+            }
+        }
+        return Optional.empty();
     }
 }

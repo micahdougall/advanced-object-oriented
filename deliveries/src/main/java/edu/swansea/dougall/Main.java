@@ -3,11 +3,12 @@ package edu.swansea.dougall;
 import com.beust.jcommander.JCommander;
 import edu.swansea.dougall.controller.DeliveryManager;
 import edu.swansea.dougall.entities.Coordinate;
-import edu.swansea.dougall.entities.DeliveryRoute;
+import edu.swansea.dougall.artifacts.DeliveryRoute;
 import edu.swansea.dougall.entities.Location;
+import edu.swansea.dougall.entities.Priority;
 import edu.swansea.dougall.util.Colors;
 import edu.swansea.dougall.util.Printer;
-import edu.swansea.dougall.entities.DeliveryAssignment;
+import edu.swansea.dougall.artifacts.DeliveryAssignment;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -34,7 +35,10 @@ public class Main {
 
         DeliveryManager manager = new DeliveryManager();
 
-        // Load data
+        // Test Assignment equality
+        testAssignmentEquality();
+
+        // Load data and de-duplicate
         loadRoutes(manager, args.routes, args.print);
         loadAssignments(manager, args.assignments, args.print);
 
@@ -55,6 +59,27 @@ public class Main {
         // TODO: Needs to use parallel processing too
         streamRoutedDeliveries(manager, args.print);
     }
+
+    public static void testAssignmentEquality() {
+        DeliveryAssignment a = new DeliveryAssignment(
+                "A", Priority.HIGH, new Coordinate(1, 2), new Coordinate(10, 20)
+        );
+        DeliveryAssignment b = new DeliveryAssignment(
+                "B", Priority.LOW, new Coordinate(1, 2), new Coordinate(10, 20)
+        );
+        DeliveryAssignment c = new DeliveryAssignment(
+                "C", Priority.HIGH, new Coordinate(100, 200), new Coordinate(10, 20)
+        );
+        try {
+            assert (a.equals(b));
+            assert (!a.equals(c));
+        } catch (AssertionError e) {
+            Printer.warning("Assertion error in testAssignmentEquality");
+            throw e;
+        }
+        Printer.info("Assignment equality tests passed", Colors.ANSI_BOLD_WHITE);
+    }
+
 
 
     /**
@@ -117,10 +142,11 @@ public class Main {
 
             Optional<DeliveryRoute> route = manager.findRoute(start, end);
             if (route.isPresent()) {
-                Printer.info("Route for coordinates: %s⤑%s %s",
-                        Colors.ANSI_BOLD_WHITE, start, end, route.get());
+                Printer.info(
+                        String.format("Route for coordinates: %s⤑%s %s", start, end, route.get()),
+                        Colors.ANSI_BOLD_WHITE);
             } else {
-                Printer.heading("\"Item not found for coordinates: %s⤑%s", start, end);
+                Printer.heading(String.format("Item not found for coordinates: %s⤑%s", start, end));
             }
         }
 
@@ -145,7 +171,9 @@ public class Main {
                 Printer.deliveryPath(
                         path.get(), assignment.getSource(), assignment.getDestination());
             } else {
-                Printer.warning("No route available for assignment: ", assignment);
+                Printer.warning(
+                        String.format("No route available for assignment: %s", assignment)
+                );
             }
         }
     }
