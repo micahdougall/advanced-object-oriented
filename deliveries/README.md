@@ -1,16 +1,4 @@
 
-// 
-
-Main is ordered for tasks, rest is top down
-
-lombok, getters
-
-Stack etc
-
-
-Main thing TODO: is to prove the batched process!
-
-neeed to delete dthe dele4t folder
 
 # CSF307 Advanced Object-Oriented Programming - Coursework 2
 <p align="center">
@@ -40,7 +28,9 @@ Inspiration for develping a Breadth-First Search as part of the Dijkstra's algor
 
 ## Usage
 
-This program takes optional arguments which can either be supplied via the command-line, or included as a run configuration.
+All local `routes.txt` and `assignments.txt` files should be located in the [resources](src/main/resources) folder to avoid throwing an error.
+
+The program also takes optional arguments which can either be supplied via the command-line, or included as a run configuration.
 
 - `-a | --assignments <filename>` &rArr; *Specifies the file in [resources](src/main/resources) to be used for loading assignments, default=assignments.txt.*
 - `-r | --routes <filename>` &rArr; *Specifies the file in [resources](src/main/resources) to be used for loading routes, default=routes.txt.*
@@ -76,7 +66,7 @@ For computing all assignment routes in the network, the performance times for pa
 | Small | 38 | 38 | *33\** |
 | Medium | 118 | 31 | *99\** |
 | Large | *n/a* | 19,969 | 123,323 |
-| Extra Large | | | |
+| Extra Large | 😆 | 😆 | 😆 |
 
 These are printed as part of the program execution.
 

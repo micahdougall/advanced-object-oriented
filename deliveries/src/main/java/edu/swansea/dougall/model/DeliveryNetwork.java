@@ -48,7 +48,6 @@ public class DeliveryNetwork {
             }
             getNode(route.getStart()).addChild(route.getEnd());
 
-
             if (!nodes.contains(endNode)) {
                 nodes.add(endNode);
             }

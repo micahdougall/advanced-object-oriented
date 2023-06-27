@@ -59,6 +59,9 @@ public class Main {
         streamRoutedDeliveries(manager, maxRecords);
     }
 
+    /**
+     * Test that {@code DeliveryAssignment}s are equal when their Coordinates match.
+     */
     public static void testAssignmentEquality() {
         DeliveryAssignment a = new DeliveryAssignment(
                 "A", Priority.HIGH, new Coordinate(1, 2), new Coordinate(10, 20)
@@ -78,8 +81,6 @@ public class Main {
         }
         Printer.info("\nAssignment equality tests passed\n", Colors.ANSI_BOLD_WHITE);
     }
-
-
 
     /**
      * Load delivery routes into the {@code DeliveryManager} controller by parsing a local file
